@@ -5,16 +5,11 @@ import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.client.gui.GuiIEContainerBase;
 import blusunrize.immersiveengineering.common.util.network.MessageTileSync;
 import crimson_twilight.immersive_energy.ImmersiveEnergy;
-import crimson_twilight.immersive_energy.api.energy.FuelHandler;
-import crimson_twilight.immersive_energy.common.Config;
-import crimson_twilight.immersive_energy.common.blocks.metal.TileEntityGasBurner;
 import crimson_twilight.immersive_energy.common.blocks.multiblock.TileEntityFluidBattery;
 import crimson_twilight.immersive_energy.common.gui.ContainerFluidBattery;
-import crimson_twilight.immersive_energy.common.gui.ContainerGasBurner;
 import crimson_twilight.immersive_energy.common.util.IEnClientUtils;
 import crimson_twilight.immersive_energy.common.util.IEnCommonUtils;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
@@ -22,9 +17,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
-import static crimson_twilight.immersive_energy.common.Config.IEnConfig.Machines.*;
+import static crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Machines.*;
 
 public class GUIFluidBattery extends GuiIEContainerBase
 {

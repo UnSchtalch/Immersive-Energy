@@ -1,7 +1,7 @@
 package crimson_twilight.immersive_energy.common.blocks;
 
 import crimson_twilight.immersive_energy.api.energy.FuelHandler;
-import crimson_twilight.immersive_energy.common.Config.IEnConfig.Machines;
+import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Machines;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
