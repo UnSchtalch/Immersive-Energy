@@ -13,6 +13,7 @@ import crimson_twilight.immersive_energy.common.CommonProxy;
 import crimson_twilight.immersive_energy.common.config.Config;
 import crimson_twilight.immersive_energy.common.IEnContent;
 import crimson_twilight.immersive_energy.common.IEnGUIList;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
@@ -41,7 +42,7 @@ public class ItemNailbox extends ItemInternalStorage implements ITool, IGuiItem
         super("nailbox", 1);
         this.hasSubtypes = false;
         NailboxHandler.addNailType(new Predicate<ItemStack>() {
-            final Set<String> set = Sets.newHashSet(Config.IEnConfig.Tools.nailbox_nails);
+            final Set<String> set = Sets.newHashSet(IEnServerConfig.TOOLS.nailbox_nails.get());
 
             @Override
             public boolean test(ItemStack stack) {

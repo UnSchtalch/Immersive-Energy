@@ -15,6 +15,7 @@ import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.api.tool.IUpgrade;
 import blusunrize.immersiveengineering.api.tool.IUpgradeableTool;
 import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Tools;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
@@ -35,9 +36,9 @@ public class ItemToolUpgradeIEn extends ItemIEnBase implements IUpgrade
 
 		ARMOR_PROTECTION_PLATES(ImmutableSet.of("POWERSUIT_HELMET", "POWERSUIT_CHEST", "POWERSUIT_LEGGS", "POWERSUIT_BOOTS"), 3, (upgrade, modifications) -> {
 			int armor = modifications.getInteger("armor_increase");
-			modifications.setInteger("armor_increase", armor+upgrade.getCount()*Tools.armor_plates_upgrade_resist);
+			modifications.setInteger("armor_increase", armor+upgrade.getCount()*IEnServerConfig.TOOLS.armor_plates_upgrade_resist.get());
 		}),
-		ARMOR_HEAT_PROTECTION(ImmutableSet.of("POWERSUIT_HELMET", "POWERSUIT_CHEST", "POWERSUIT_LEGGS", "POWERSUIT_BOOTS"), 3, (upgrade, modifications) -> modifications.setInteger("heat_protection", upgrade.getCount()*Tools.heat_upgrade_resist)),
+		ARMOR_HEAT_PROTECTION(ImmutableSet.of("POWERSUIT_HELMET", "POWERSUIT_CHEST", "POWERSUIT_LEGGS", "POWERSUIT_BOOTS"), 3, (upgrade, modifications) -> modifications.setInteger("heat_protection", upgrade.getCount()* IEnServerConfig.TOOLS.heat_upgrade_resist.get())),
 		ARMOR_HELMET_VOLTMETER(ImmutableSet.of("POWERSUIT_HELMET"), 1, (upgrade, modifications) -> modifications.setBoolean("voltmeter", true)),
 
 		NAILGUN_EXTENDED_AMMO(ImmutableSet.of("NAILGUN_AMMO"), 1, (upgrade, modifications) -> modifications.setInteger("ammo", 1)),

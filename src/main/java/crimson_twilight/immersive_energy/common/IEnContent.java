@@ -9,8 +9,8 @@ import blusunrize.immersiveengineering.api.crafting.IngredientStack;
 import blusunrize.immersiveengineering.api.energy.ThermoelectricHandler;
 import blusunrize.immersiveengineering.api.tool.RailgunHandler;
 import crimson_twilight.immersive_energy.ImmersiveEnergy;
-import crimson_twilight.immersive_energy.common.config.Config.IEnConfig;
-import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Tools;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig.Tools;
 import crimson_twilight.immersive_energy.common.blocks.BlockIEnBase;
 import crimson_twilight.immersive_energy.common.blocks.BlockIEnFluid;
 import crimson_twilight.immersive_energy.common.blocks.BlockIEnSlab;
@@ -157,8 +157,16 @@ public class IEnContent {
         itemPowerArmorBoots = new ItemPowerArmorBoots();
 
         //Tools and Weapons
-        itemArrow = new IEnArrowBase("arrow_shocking", "electricdamage", String.valueOf(IEnServerConfig.TOOLS.shock_arrow_electric_damage)).setDamage(IEnServerConfig.TOOLS.shock_arrow_regular_damage).setKnockback(IEnServerConfig.TOOLS.shock_arrow_knockback).setIgnoreInvulnerability(IEnServerConfig.TOOLS.shock_arrow_ignore).setLogic(new ArrowLogicShock(IEnServerConfig.TOOLS.shock_arrow_electric_damage));
-        itemArrow = new IEnArrowBase("arrow_penetrating", "penetratingdamage", String.valueOf(IEnServerConfig.TOOLS.penetrating_arrow_regular_damage)).setDamage(IEnServerConfig.TOOLS.penetrating_arrow_regular_damage).setKnockback(IEnServerConfig.TOOLS.penetrating_arrow_knockback).setIgnoreInvulnerability(IEnServerConfig.TOOLS.penetrating_arrow_ignore).setLogic(new ArrowLogicPenetrating(IEnServerConfig.TOOLS.penetrating_arrow_penetrating_damage));
+        itemArrow = new IEnArrowBase("arrow_shocking", "electricdamage", String.valueOf(IEnServerConfig.TOOLS.shock_arrow_electric_damage))
+                .setDamage(IEnServerConfig.TOOLS.shock_arrow_regular_damage.get())
+                .setKnockback(IEnServerConfig.TOOLS.shock_arrow_knockback.get())
+                .setIgnoreInvulnerability(IEnServerConfig.TOOLS.shock_arrow_ignore.get())
+                .setLogic(new ArrowLogicShock(IEnServerConfig.TOOLS.shock_arrow_electric_damage.get()));
+        itemArrow = new IEnArrowBase("arrow_penetrating", "penetratingdamage", String.valueOf(IEnServerConfig.TOOLS.penetrating_arrow_regular_damage))
+                .setDamage(IEnServerConfig.TOOLS.penetrating_arrow_regular_damage.get())
+                .setKnockback(IEnServerConfig.TOOLS.penetrating_arrow_knockback.get())
+                .setIgnoreInvulnerability(IEnServerConfig.TOOLS.penetrating_arrow_ignore.get())
+                .setLogic(new ArrowLogicPenetrating(IEnServerConfig.TOOLS.penetrating_arrow_penetrating_damage.get()));
         itemNail = new ItemIEnNail("iron_nail", 64, 4);
         itemNail = new ItemIEnNail("steel_nail", 64, 6);
         itemUpgrades = new ItemToolUpgradeIEn();

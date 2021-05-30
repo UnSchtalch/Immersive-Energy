@@ -6,9 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import com.google.common.collect.Maps;
 
@@ -33,11 +31,8 @@ public class IEnServerConfig
 		public static HashMap<String, Integer> manual_int = new HashMap<String, Integer>();
 		public static HashMap<String, int[]> manual_intA = new HashMap<String, int[]>();
 
-		@Comment({"A list of all mods that IEn has integrated compatability for", "Setting any of these to false disables the respective compat"})
-		public static Map<String, Boolean> compat = Maps.newHashMap(Maps.toMap(IEnCompatModule.moduleClasses.keySet(), (s) -> Boolean.TRUE));
 
 		public static final Machines MACHINES;
-		public static final Ores ORES;
 		public static final Tools TOOLS;
 
 		public static final ForgeConfigSpec ALL;
@@ -45,8 +40,9 @@ public class IEnServerConfig
 		static {
 			ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 			MACHINES = new Machines(builder);
-			ORES = new Ores(builder);
 			TOOLS = new Tools(builder);
+
+			ALL = builder.build();
 		}
 
 		public static class Machines
@@ -108,28 +104,7 @@ public class IEnServerConfig
 				public static int maxOutput = 32768;
 			}
 		}
-		
-		public static class Ores
-		{
-			@Comment({"Generation config for Thorium Ore.", "Parameters: Vein size, lowest possible Y, highest possible Y, veins per chunk, chance for vein to spawn (out of 100). Set vein size to 0 to disable the generation"})
-			@Mapped(mapClass = Config.class, mapName = "manual_intA")
-			public static int[] ore_thorium = new int[]{5, 8, 24, 2, 80};
-			@Comment({"Generation config for Tungsten Ore.", "Parameters: Vein size, lowest possible Y, highest possible Y, veins per chunk, chance for vein to spawn (out of 100). Set vein size to 0 to disable the generation"})
-			@Mapped(mapClass = Config.class, mapName = "manual_intA")
-			public static int[] ore_tungsten = new int[]{2, 8, 24, 2, 30};
-			@Comment({"Set this to false to disable the logging of the chunks that were flagged for retrogen."})
-			public static boolean retrogen_log_flagChunk = true;
-			@Comment({"Set this to false to disable the logging of the chunks that are still left to retrogen."})
-			public static boolean retrogen_log_remaining = true;
-			@Comment({"The retrogeneration key. Basically IEn checks if this key is saved in the chunks data. If it isn't, it will perform retrogen on all ores marked for retrogen.", "Change this in combination with the retrogen booleans to regen only some of the ores."})
-			public static String retrogen_key = "DEFAULT";
-			@Comment({"Set this to true to allow retro-generation of Thorium Ore."})
-			@Mapped(mapClass = IEWorldGen.class, mapName = "retrogenMap")
-			public static boolean retrogen_thorium = false;
-			@Comment({"Set this to true to allow retro-generation of Tungsten Ore."})
-			@Mapped(mapClass = IEWorldGen.class, mapName = "retrogenMap")
-			public static boolean retrogen_tungsten = false;
-		}
+
 		
 		public static class Tools
 		{
@@ -149,6 +124,8 @@ public class IEnServerConfig
 			public final ForgeConfigSpec.ConfigValue<Integer> heat_upgrade_resist;
 
 			public final ForgeConfigSpec.ConfigValue<Boolean> nail_gun_no_invulnerability;
+
+			public final ForgeConfigSpec.ConfigValue<List<String>> nailbox_nails;
 
 			 Tools(ForgeConfigSpec.Builder builder){
 				builder.push("Tools");
@@ -195,9 +172,12 @@ public class IEnServerConfig
 						.comment("Does the Shocking Arrow ignore invulnerability frames, default=false")
 						.define("nail_gun_no_invulnerability",Boolean.valueOf(true));
 
+				nailbox_nails = builder
+						 .comment("A whitelist of foods allowed in the nailbox, formatting: [mod id]:[item name]")
+						 .define("nailbox_nails", Collections.emptyList());
+
 			}
-			@Comment({"A whitelist of foods allowed in the nailbox, formatting: [mod id]:[item name]"})
-			public static String[] nailbox_nails = new String[]{};
+
 		}
 
 		public static void preInit(FMLPreInitializationEvent event)

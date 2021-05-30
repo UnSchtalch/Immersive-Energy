@@ -2,6 +2,7 @@ package crimson_twilight.immersive_energy.common.entities;
 
 import blusunrize.immersiveengineering.common.util.Utils;
 import crimson_twilight.immersive_energy.common.config.Config;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
 import crimson_twilight.immersive_energy.common.util.IEnDamageSources;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -38,7 +39,7 @@ public class EntityIEnNail extends Entity
     private int tickLimit = 40;
     private ItemStack nailStack;
     protected int damage = 0;
-    boolean resetHurt = Config.IEnConfig.Tools.nail_gun_no_invulnerability;
+    boolean resetHurt = IEnServerConfig.TOOLS.nail_gun_no_invulnerability.get();
     boolean setFire = false;
 
     private static final DataParameter<String> dataMarker_shooter = EntityDataManager.createKey(EntityIEnNail.class, DataSerializers.STRING);
