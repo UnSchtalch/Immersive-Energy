@@ -6,11 +6,12 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import blusunrize.immersiveengineering.common.config.IEServerConfig;
 import com.google.common.collect.Multimap;
 
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.api.tool.IElectricEquipment;
-import blusunrize.immersiveengineering.common.Config.IEConfig.Machines;
+import blusunrize.immersiveengineering.common.config.IEServerConfig.Machines;
 import blusunrize.immersiveengineering.common.util.IEDamageSources.ElectricDamageSource;
 import crimson_twilight.immersive_energy.ImmersiveEnergy;
 import crimson_twilight.immersive_energy.common.IEnContent;
@@ -94,7 +95,7 @@ public class ItemPowerArmorLegs extends ItemUpgradeableArmor implements IElectri
 			{
 				cache.put("power_armor_suit_legs", 1<<armorType.getIndex());
 			}
-			if(dmg.dmg*100 <= Machines.capacitorHV_input&&cache.containsKey("power_armor_suit_helmet")&&cache.containsKey("power_armor_suit_chest")&&cache.containsKey("power_armor_suit_legs")&&cache.containsKey("power_armor_suit_boots"))
+			if(dmg.dmg*100 <= IEServerConfig.MACHINES.hvCapConfig.input.getAsInt() &&cache.containsKey("power_armor_suit_helmet")&&cache.containsKey("power_armor_suit_chest")&&cache.containsKey("power_armor_suit_legs")&&cache.containsKey("power_armor_suit_boots"))
 			{
 
 			}

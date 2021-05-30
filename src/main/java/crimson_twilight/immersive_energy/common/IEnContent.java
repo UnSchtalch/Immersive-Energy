@@ -218,7 +218,7 @@ public class IEnContent {
         //Thermoelectric
         ThermoelectricHandler.registerSourceInKelvin("blockThorium", 1800);
 
-        IEnConfig.addBurnerFuel(IEnConfig.Machines.burner_fuels);
+        IEnConfig.addBurnerFuel(IEnServerConfig.MACHINES.burner_fuels.get());
     }
 
     public static void initEnd() {

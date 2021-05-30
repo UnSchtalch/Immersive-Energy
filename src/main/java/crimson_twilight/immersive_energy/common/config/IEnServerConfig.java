@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+import blusunrize.immersiveengineering.common.config.IEServerConfig;
 import com.google.common.collect.Maps;
 
 import blusunrize.immersiveengineering.common.world.IEWorldGen;
@@ -47,61 +48,81 @@ public class IEnServerConfig
 
 		public static class Machines
 		{
-			@Comment({"Power config for Solar Panels.", "Parameters: Base gen"})
-			@Mapped(mapClass = Config.class, mapName = "manual_int")
-			public static int base_solar = 5;
-			@SuppressWarnings("static-access")
-			@Comment({"Power storage config for Solar Panels.", "Parameters: Storage"})
-			@Mapped(mapClass = Config.class, mapName = "manual_int")
-			public static int storage_solar = IEConfig.machines.capacitorLV_storage/4;
-			@Comment({"Durability of Thorium Rods.", "Parameters: durability"})
-			@RangeInt(min = 1)
-			public static int thoriumRodMaxDamage = 32600;
-			@Comment({"Decay chance of Thorium Rods.", "Parameters: chance"})
-			@RangeInt(min = 1)
-			public static int thoriumRodDecay = 6538;
-			@Comment({"Durability of Thorium Rods.", "Parameters: durability"})
-			@RangeInt(min = 1)
-			public static int uraniumRodMaxDamage = 31800;
-			@Comment({"Decay chance of Uranium Rods.", "Parameters: chance"})
-			@RangeInt(min = 1)
-			public static int uraniumRodDecay = 5338;
-			@Comment({"Fluid capacity of the Gas Burner (in mB)"})
-			@RangeInt(min = 1)
-			public static int burnerCapacity = 2000;
-			@Comment({"List of Gas Burner fuels. Format: fluid_name, tick_per_mB_used"})
-			public static String[] burner_fuels = new String[]{
-					"biodiesel, 16",
-					"ethanol, 8",
-					"creosote, 4",
-					"gasoline, 20",
-					"methanol, 20"
-			};
+			public final ForgeConfigSpec.ConfigValue<Integer> base_solar;
+			public final ForgeConfigSpec.ConfigValue<Integer> storage_solar;
+			public final ForgeConfigSpec.ConfigValue<Integer> thoriumRodMaxDamage;
+			public final ForgeConfigSpec.ConfigValue<Integer> thoriumRodDecay;
+			public final ForgeConfigSpec.ConfigValue<Integer> uraniumRodMaxDamage;
+			public final ForgeConfigSpec.ConfigValue<Integer> uraniumRodDecay;
+			public final ForgeConfigSpec.ConfigValue<Integer> burnerCapacity;
+			public final ForgeConfigSpec.ConfigValue<List<String>> burner_fuels;
 
-			@SubConfig
-			FluidBattery fluidBattery;
+			public final FluidBattery fluidBattery;
+
+			Machines(ForgeConfigSpec.Builder builder){
+				builder.push("Machines");
+				base_solar = builder
+						.comment("Base power generation of solar panel FE/t, default=5")
+						.define("base_solar",Integer.valueOf(5));
+				storage_solar = builder
+						.comment("Solar panel internal capacity, default is quarter of LV capacitor")
+						.define("storage_solar",Integer.valueOf(IEServerConfig.MACHINES.lvCapConfig.storage.getAsInt() / 4));
+
+				thoriumRodMaxDamage = builder
+						.comment("Durability of thorium rods, default=32600")
+						.define("thoriumRodMaxDamage",Integer.valueOf(32600));
+
+				uraniumRodMaxDamage = builder
+						.comment("Durability of uranium rods, default=31800")
+						.define("uraniumRodMaxDamage",Integer.valueOf(31800));
+
+				burnerCapacity = builder
+						.comment("Fluid capacity of the Gas Burner (in mB), default=2000")
+						.define("burnerCapacity",Integer.valueOf(2000));
+
+				thoriumRodDecay = builder
+						.comment("Decay chance of thorium rods (do not touch), default=6538")
+						.define("thoriumRodDecay",Integer.valueOf(6538));
+				uraniumRodDecay = builder
+						.comment("Decay chance of uranium rods (do not touch), default=6538")
+						.define("uraniumRodDecay",Integer.valueOf(5538));
+				List<String> l_burner_fuels = Arrays.asList(new String[]{
+						"biodiesel, 16",
+						"ethanol, 8",
+						"creosote, 4",
+						"gasoline, 20",
+						"methanol, 20"
+				});
+				burner_fuels = builder
+						.comment("List of Gas Burner fuels. Format: fluid_name, tick_per_mB_used")
+						.define("burner_fuels", l_burner_fuels);
+				fluidBattery= new FluidBattery(builder);
+				builder.pop();
+			}
+
 
 			public static class FluidBattery
 			{
-				@Comment({"Fluid capacity of one tank of the Fluid Battery (in mB). Default: 144000"})
-				@RangeInt(min = 1)
-				@net.minecraftforge.common.config.Config.RequiresMcRestart
-				public static int fluidCapacity = 144000;
-
-				@Comment({"Energy exchange amount (in IF per mb). Default: 2048"})
-				@RangeInt(min = 1)
-				@net.minecraftforge.common.config.Config.RequiresMcRestart
-				public static int IFAmount = 2048;
-
-				@Comment({"Amout of energy that can be inputted to one energy port(in IF/Tick). Default: 32768"})
-				@RangeInt(min = 1)
-				@net.minecraftforge.common.config.Config.RequiresMcRestart
-				public static int maxInput = 32768;
-
-				@Comment({"Amout of energy that can be outputted on one energy port(in IF/Tick). Default: 32768"})
-				@RangeInt(min = 1)
-				@net.minecraftforge.common.config.Config.RequiresMcRestart
-				public static int maxOutput = 32768;
+				public final ForgeConfigSpec.ConfigValue<Integer> fluidCapacity;
+				public final ForgeConfigSpec.ConfigValue<Integer> IFAmount;
+				public final ForgeConfigSpec.ConfigValue<Integer> maxInput;
+				public final ForgeConfigSpec.ConfigValue<Integer> maxOutput;
+				FluidBattery(ForgeConfigSpec.Builder builder){
+					builder.push("Liquid Battery");
+					fluidCapacity = builder
+							.comment("Fluid capacity of one tank of the Fluid Battery (in mB), default=144000")
+							.define("fluidCapacity",Integer.valueOf(144000));
+					IFAmount = builder
+							.comment("Energy exchange amount (in IF per mb), default=2048")
+							.define("IFAmount",Integer.valueOf(2048));
+					maxInput = builder
+							.comment("Amount of energy that can be inputted to one energy port(in IF/Tick), default=32768")
+							.define("maxInput",Integer.valueOf(32768));
+					maxOutput = builder
+							.comment("Amount of energy that can be outputted on one energy port(in IF/Tick), default=32768")
+							.define("maxInput",Integer.valueOf(32768));
+					builder.pop();
+				}
 			}
 		}
 
@@ -175,6 +196,8 @@ public class IEnServerConfig
 				nailbox_nails = builder
 						 .comment("A whitelist of foods allowed in the nailbox, formatting: [mod id]:[item name]")
 						 .define("nailbox_nails", Collections.emptyList());
+
+				builder.pop();
 
 			}
 

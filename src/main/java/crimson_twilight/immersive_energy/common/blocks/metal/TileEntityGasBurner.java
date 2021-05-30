@@ -9,8 +9,9 @@ import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.inventory.IIEInventory;
 import crimson_twilight.immersive_energy.api.crafting.GasBurnerRecipe;
 import crimson_twilight.immersive_energy.api.energy.FuelHandler;
-import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Machines;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig.Machines;
 import crimson_twilight.immersive_energy.common.IEnGUIList;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -32,6 +33,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nonnull;
@@ -47,7 +49,7 @@ public class TileEntityGasBurner extends TileEntityIEBase implements IIEInventor
 	public double heatMax = 2400;
 	public double heatMin = 450;
 	public int cookNeeded = cookMax;
-	public FluidTank tank = new FluidTank(Machines.burnerCapacity)
+	public FluidTank tank = new FluidTank(IEnServerConfig.MACHINES.burnerCapacity.get())
 	{
 		@Override
 		public boolean canFillFluidType(FluidStack fluid)

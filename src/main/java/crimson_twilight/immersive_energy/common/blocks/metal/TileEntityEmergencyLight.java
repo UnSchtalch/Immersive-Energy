@@ -17,7 +17,8 @@ import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxC
 import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxHandler;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
-import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Machines;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig.Machines;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -157,7 +158,7 @@ public class TileEntityEmergencyLight extends TileEntityImmersiveConnectable imp
     }
 
     private int getMaxStorage() {
-        return Machines.storage_solar;
+        return IEnServerConfig.MACHINES.storage_solar.get();
     }
 
     @Override

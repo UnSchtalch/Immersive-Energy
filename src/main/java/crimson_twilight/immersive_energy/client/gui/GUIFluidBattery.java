@@ -18,7 +18,7 @@ import org.lwjgl.opengl.GL11;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Machines.*;
+import static crimson_twilight.immersive_energy.common.config.IEnServerConfig.*;
 
 public class GUIFluidBattery extends GuiIEContainerBase
 {
@@ -72,8 +72,8 @@ public class GUIFluidBattery extends GuiIEContainerBase
 			tickSwitch(i+1,switches[i]);
 		}*/
 
-		int energy=tile.tanks[1].getFluidAmount()*FluidBattery.IFAmount;
-		int maxEnergy=tile.tanks[1].getCapacity()*FluidBattery.IFAmount;
+		int energy=tile.tanks[1].getFluidAmount()*MACHINES.fluidBattery.IFAmount.get();
+		int maxEnergy=tile.tanks[1].getCapacity()*MACHINES.fluidBattery.IFAmount.get();
 
 		if(IEnCommonUtils.isPointInRectangle(guiLeft+65, guiTop+72, guiLeft+64+47, guiTop+79,mouseX,mouseY))
 			tooltip.add(energy+"/"+maxEnergy+" IF");
@@ -116,8 +116,8 @@ public class GUIFluidBattery extends GuiIEContainerBase
 		this.drawTexturedModalRect(guiLeft+119,guiTop+13,(switches[3]^rs?178:176),78,2,2);
 		this.drawTexturedModalRect(guiLeft+157,guiTop+13,(switches[1]^rs?178:176),78,2,2);
 
-		int energy=tile.tanks[1].getFluidAmount()*FluidBattery.IFAmount;
-		int maxEnergy=tile.tanks[1].getCapacity()*FluidBattery.IFAmount;
+		int energy=tile.tanks[1].getFluidAmount()*MACHINES.fluidBattery.IFAmount.get();
+		int maxEnergy=tile.tanks[1].getCapacity()*MACHINES.fluidBattery.IFAmount.get();
 
 		int stored = (int)(47*energy/(float)maxEnergy);
 		IEnClientUtils.drawGradientRectHorizontal(guiLeft+65, guiTop+72, guiLeft+64+stored, guiTop+79,  0xff600b00,0xffb51500);

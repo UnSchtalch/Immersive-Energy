@@ -8,6 +8,7 @@ import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IAdvanced
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IAdvancedSelectionBounds;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IGuiTile;
 import blusunrize.immersiveengineering.common.blocks.metal.TileEntityMultiblockMetal;
+import blusunrize.immersiveengineering.common.config.IEServerConfig;
 import blusunrize.immersiveengineering.common.util.EnergyHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.inventory.MultiFluidTank;
@@ -15,6 +16,7 @@ import blusunrize.immersiveengineering.common.util.network.MessageTileSync;
 import crimson_twilight.immersive_energy.common.IEnContent;
 import crimson_twilight.immersive_energy.common.IEnGUIList;
 import crimson_twilight.immersive_energy.common.compat.ImmersiveIntelligenceHelper;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
 import crimson_twilight.immersive_energy.common.util.IEnCommonUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -52,7 +54,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Machines.FluidBattery;
+import static crimson_twilight.immersive_energy.common.config.IEnServerConfig.*;
 
 /**
  * @author Pabilo8
@@ -63,8 +65,8 @@ import static crimson_twilight.immersive_energy.common.config.Config.IEnConfig.M
 @Optional.Interface(iface = "elucent.albedo.lighting.pl.pabilo8.immersiveintelligence.api.data.IDataDevice", modid = "immersiveintelligence")
 public class TileEntityFluidBattery extends TileEntityMultiblockMetal<TileEntityFluidBattery, IMultiblockRecipe> implements IAdvancedSelectionBounds, IAdvancedCollisionBounds, IOBJModelCallback<IBlockState>, IGuiTile {
     public MultiFluidTank[] tanks = {
-            new MultiFluidTank(FluidBattery.fluidCapacity),
-            new MultiFluidTank(FluidBattery.fluidCapacity)
+            new MultiFluidTank(IEnServerConfig.MACHINES.fluidBattery.fluidCapacity.get()),
+            new MultiFluidTank(IEnServerConfig.MACHINES.fluidBattery.fluidCapacity.get())
     };
 
     //When true, II takes the control of each port independently, using data
@@ -181,18 +183,18 @@ public class TileEntityFluidBattery extends TileEntityMultiblockMetal<TileEntity
 
         int out = getMaxOutput();
         int remaining = EnergyHelper.insertFlux(tileEntity, EnumFacing.DOWN, out, false);
-        tanks[1].drain(remaining / FluidBattery.IFAmount, true);
-        tanks[0].fill(new FluidStack(IEnContent.fluidCharging, remaining / FluidBattery.IFAmount), true);
+        tanks[1].drain(remaining / MACHINES.fluidBattery.IFAmount.get(), true);
+        tanks[0].fill(new FluidStack(IEnContent.fluidCharging, remaining / MACHINES.fluidBattery.IFAmount.get()), true);
     }
 
     private int getMaxOutput() {
         int maxTank = tanks[0].getCapacity() - tanks[0].getFluidAmount();
-        return Math.min(Math.min(tanks[1].getFluidAmount(), maxTank) * FluidBattery.IFAmount, FluidBattery.maxOutput);
+        return Math.min(Math.min(tanks[1].getFluidAmount(), maxTank) * MACHINES.fluidBattery.IFAmount.get(), MACHINES.fluidBattery.maxOutput.get());
     }
 
     private int getMaxInput() {
         int maxTank = tanks[1].getCapacity() - tanks[1].getFluidAmount();
-        return Math.min(Math.min(tanks[0].getFluidAmount(), maxTank) * FluidBattery.IFAmount, FluidBattery.maxInput);
+        return Math.min(Math.min(tanks[0].getFluidAmount(), maxTank) * MACHINES.fluidBattery.IFAmount.get(), MACHINES.fluidBattery.maxInput.get());
     }
 
     private boolean transferFluid(FluidStack out1, IFluidHandler output1, int i) {
@@ -583,8 +585,8 @@ public class TileEntityFluidBattery extends TileEntityMultiblockMetal<TileEntity
                 return 0;
 
             int amount = Math.min(master.getMaxInput(),maxReceive);
-            master.tanks[0].drain(amount/FluidBattery.IFAmount,!simulate);
-            master.tanks[1].fill(new FluidStack(IEnContent.fluidCharged,amount/FluidBattery.IFAmount),!simulate);
+            master.tanks[0].drain(amount/MACHINES.fluidBattery.IFAmount.get(),!simulate);
+            master.tanks[1].fill(new FluidStack(IEnContent.fluidCharged,amount/MACHINES.fluidBattery.IFAmount.get()),!simulate);
 
             if(amount>0)
             {
@@ -607,7 +609,7 @@ public class TileEntityFluidBattery extends TileEntityMultiblockMetal<TileEntity
             TileEntityFluidBattery master = te.master();
             if(!te.isEnergyPos()||master==null)
                 return 0;
-            return master.tanks[1].getFluidAmount()*FluidBattery.IFAmount;
+            return master.tanks[1].getFluidAmount()*MACHINES.fluidBattery.IFAmount.get();
         }
 
         @Override
@@ -616,7 +618,7 @@ public class TileEntityFluidBattery extends TileEntityMultiblockMetal<TileEntity
             TileEntityFluidBattery master = te.master();
             if(!te.isEnergyPos()||master==null)
                 return 0;
-            return master.tanks[1].getCapacity()*FluidBattery.IFAmount;
+            return master.tanks[1].getCapacity()*MACHINES.fluidBattery.IFAmount.get();
         }
 
         @Override

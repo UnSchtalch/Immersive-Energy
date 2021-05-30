@@ -18,9 +18,10 @@ import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxC
 import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxHandler;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
-import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Machines;
-import crimson_twilight.immersive_energy.common.compat.IEnCompatModule;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig.Machines;
+import crimson_twilight.immersive_energy.common.compat.IEnCompatModule;s
 import crimson_twilight.immersive_energy.common.compat.SereneSeasonsHelper;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -112,7 +113,7 @@ public class TileEntitySolarPanel extends TileEntityImmersiveConnectable impleme
 
     @Override
     public void update() {
-        energyGeneration = Machines.base_solar;
+        energyGeneration = IEnServerConfig.MACHINES.base_solar.get();
         if (!world.isRemote) {
             markContainingBlockForUpdate(null);
         }
@@ -281,7 +282,7 @@ public class TileEntitySolarPanel extends TileEntityImmersiveConnectable impleme
     }
 
     private int getMaxStorage() {
-        return Machines.storage_solar;
+        return IEnServerConfig.MACHINES.storage_solar.get();
     }
 
     @Override

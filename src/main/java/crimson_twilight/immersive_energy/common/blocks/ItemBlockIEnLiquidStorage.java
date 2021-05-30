@@ -1,7 +1,8 @@
 package crimson_twilight.immersive_energy.common.blocks;
 
 import crimson_twilight.immersive_energy.api.energy.FuelHandler;
-import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Machines;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig.Machines;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,7 +23,7 @@ public class ItemBlockIEnLiquidStorage extends ItemBlockIEnBase
 	public ICapabilityProvider initCapabilities(ItemStack stack, NBTTagCompound nbt)
 	{
 		if(!stack.isEmpty())
-			return new FluidHandlerItemStack(stack, Machines.burnerCapacity)
+			return new FluidHandlerItemStack(stack, IEnServerConfig.MACHINES.burnerCapacity.get())
 			{
 				@Override
 				public boolean canFillFluidType(FluidStack fluid)

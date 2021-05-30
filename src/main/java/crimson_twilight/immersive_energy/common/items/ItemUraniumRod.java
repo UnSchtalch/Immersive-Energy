@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import crimson_twilight.immersive_energy.common.config.Config.IEnConfig;
+import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -24,7 +25,7 @@ public class ItemUraniumRod extends ItemIEnBase
 	public ItemUraniumRod()
 	{
 		super("stick_uranium", 16);
-		uraniumRodMaxDamage = IEnConfig.Machines.uraniumRodMaxDamage;
+		uraniumRodMaxDamage = IEnServerConfig.MACHINES.uraniumRodMaxDamage.get();
 	}
 
 	@Override
@@ -44,7 +45,7 @@ public class ItemUraniumRod extends ItemIEnBase
 		Random rand = new Random();
 		if(ent instanceof EntityLiving)
 			if(super.getDamage(stack) != uraniumRodMaxDamage)
-				if(rand.nextInt(Math.round(IEnConfig.machines.uraniumRodDecay)/stack.getCount()) == 0)
+				if(rand.nextInt(Math.round(IEnServerConfig.MACHINES.uraniumRodDecay.get())/stack.getCount()) == 0)
 				{
 					//TODO check for hazmat suit
 					((EntityLivingBase)ent).setHealth(((EntityLivingBase)ent).getHealth() - 1);
