@@ -1,4 +1,4 @@
-package crimson_twilight.immersive_energy.common;
+package crimson_twilight.immersive_energy.common.config;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -17,35 +17,38 @@ import crimson_twilight.immersive_energy.ImmersiveEnergy;
 import crimson_twilight.immersive_energy.api.energy.FuelHandler;
 import crimson_twilight.immersive_energy.common.compat.IEnCompatModule;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
 import net.minecraftforge.common.config.Config.RangeInt;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
-public class Config 
-{
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.fml.config.ModConfig.ModConfigEvent;
 
-	public static HashMap<String, Boolean> manual_bool = new HashMap<String, Boolean>();
-	public static HashMap<String, Integer> manual_int = new HashMap<String, Integer>();
-	public static HashMap<String, int[]> manual_intA = new HashMap<String, int[]>();
-	
-	@net.minecraftforge.common.config.Config(modid = ImmersiveEnergy.MODID)
-	public static class IEnConfig
+@EventBusSubscriber(modid = ImmersiveEnergy.MODID, bus = Bus.MOD)
+
+public class IEnServerConfig
 	{
+		public static HashMap<String, Boolean> manual_bool = new HashMap<String, Boolean>();
+		public static HashMap<String, Integer> manual_int = new HashMap<String, Integer>();
+		public static HashMap<String, int[]> manual_intA = new HashMap<String, int[]>();
+
 		@Comment({"A list of all mods that IEn has integrated compatability for", "Setting any of these to false disables the respective compat"})
 		public static Map<String, Boolean> compat = Maps.newHashMap(Maps.toMap(IEnCompatModule.moduleClasses.keySet(), (s) -> Boolean.TRUE));
 
-		@SubConfig
-		public static Machines machines;
-		@SubConfig
-		public static Ores ores;
-		@SubConfig
-		public static Tools tools;
-		
+		public static final Machines MACHINES;
+		public static final Ores ORES;
+		public static final Tools TOOLS;
+
+		public static final ForgeConfigSpec ALL;
+
+		static {
+			ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+			MACHINES = new Machines(builder);
+			ORES = new Ores(builder);
+			TOOLS = new Tools(builder);
+		}
+
 		public static class Machines
 		{
 			@Comment({"Power config for Solar Panels.", "Parameters: Base gen"})
@@ -130,33 +133,69 @@ public class Config
 		
 		public static class Tools
 		{
-			@Comment({"Base damage of Shocking Arrow.", "Default: 2"})
-			public static int shock_arrow_regular_damage = 2;
-			@Comment({"Electric damage of Shocking Arrow.", "Default: 3"})
-			public static int shock_arrow_electric_damage = 3;
-			@Comment({"Base knockback of Shocking Arrow.", "Default: 0"})
-			public static int shock_arrow_knockback = 0;
-			@Comment({"Does the Shocking Arrow ignore invulnerability frames.", "Default: false"})
-			public static boolean shock_arrow_ignore = false;
-			@Comment({"Base damage of Piercing Arrow.", "Default: 2"})
-			public static int penetrating_arrow_regular_damage = 2;
-			@Comment({"Electric damage of Piercing Arrow.", "Default: 3"})
-			public static int penetrating_arrow_penetrating_damage = 3;
-			@Comment({"Base knockback of Piercing Arrow.", "Default: 1"})
-			public static int penetrating_arrow_knockback = 1;
-			@Comment({"Does the Piercing Arrow ignore invulnerability frames.", "Default: true"})
-			public static boolean penetrating_arrow_ignore = true;
+			public final ForgeConfigSpec.ConfigValue<Integer> shock_arrow_regular_damage;
+			public final ForgeConfigSpec.ConfigValue<Integer> shock_arrow_electric_damage;
+			public final ForgeConfigSpec.ConfigValue<Integer> shock_arrow_knockback;
+			public final ForgeConfigSpec.ConfigValue<Boolean> shock_arrow_ignore;
 
-			@Comment({"Resistance to damage added by Additional Armor Plates upgrade", "Default: 3"})
-			public static int armor_plates_upgrade_resist = 3;
-			@Comment({"Resistance to damage added by Additional Armor Plates upgrade", "Default: 100"})
-			public static int heat_base_resist = 100;
-			@Comment({"Resistance to heat added by each Heat Resistant Plates upgrade", "Default: 5000"})
-			public static int heat_upgrade_resist = 5000;
+			public final ForgeConfigSpec.ConfigValue<Integer> penetrating_arrow_regular_damage;
+			public final ForgeConfigSpec.ConfigValue<Integer> penetrating_arrow_penetrating_damage;
+			public final ForgeConfigSpec.ConfigValue<Integer> penetrating_arrow_knockback;
 
-			@Comment({"Does the Piercing Arrow ignore invulnerability frames.", "Default: true"})
-			public static boolean nail_gun_no_invulnerability = true;
+			public final ForgeConfigSpec.ConfigValue<Boolean> penetrating_arrow_ignore;
 
+			public final ForgeConfigSpec.ConfigValue<Integer> armor_plates_upgrade_resist;
+			public final ForgeConfigSpec.ConfigValue<Integer> heat_base_resist;
+			public final ForgeConfigSpec.ConfigValue<Integer> heat_upgrade_resist;
+
+			public final ForgeConfigSpec.ConfigValue<Boolean> nail_gun_no_invulnerability;
+
+			 Tools(ForgeConfigSpec.Builder builder){
+				builder.push("Tools");
+				shock_arrow_regular_damage = builder
+						.comment("Base damage of Shocking Arrow, default=2")
+						.define("shock_arrow_regular_damage",Integer.valueOf(2));
+				shock_arrow_electric_damage = builder
+						.comment("Electric damage of Shocking Arrow, default=3")
+						.define("shock_arrow_electric_damage",Integer.valueOf(3));
+				shock_arrow_knockback = builder
+						.comment("Base knockback of Shocking Arrow, default=0")
+						.define("shock_arrow_knockback",Integer.valueOf(0));
+
+				penetrating_arrow_regular_damage = builder
+						.comment("Base damage of Piercing Arrow, default=2")
+						.define("penetrating_arrow_regular_damage",Integer.valueOf(2));
+				penetrating_arrow_penetrating_damage = builder
+						.comment("Electric damage of Piercing Arrow, default=3")
+						.define("penetrating_arrow_penetrating_damage",Integer.valueOf(3));
+				penetrating_arrow_knockback = builder
+						.comment("Base knockback of Piercing Arrow, default=0")
+						.define("penetrating_arrow_knockback",Integer.valueOf(1));
+
+
+				armor_plates_upgrade_resist = builder
+						.comment("Resistance to damage added by Additional Armor Plates upgrade, default=3")
+						.define("armor_plates_upgrade_resist",Integer.valueOf(3));
+				heat_base_resist = builder
+						.comment("Base resistance to heat, default=100")
+						.define("heat_base_resist",Integer.valueOf(100));
+				heat_upgrade_resist = builder
+						.comment("Resistance to heat added by each Heat Resistant Plates upgrade, default=5000")
+						.define("heat_upgrade_resist",Integer.valueOf(5000));
+
+				shock_arrow_ignore = builder
+						.comment("Does the Shocking Arrow ignore invulnerability frames, default=false")
+						.define("shock_arrow_ignore",Boolean.valueOf(false));
+
+				penetrating_arrow_ignore = builder
+						.comment("Does the Shocking Arrow ignore invulnerability frames, default=false")
+						.define("penetrating_arrow_ignore",Boolean.valueOf(true));
+
+				nail_gun_no_invulnerability = builder
+						.comment("Does the Shocking Arrow ignore invulnerability frames, default=false")
+						.define("nail_gun_no_invulnerability",Boolean.valueOf(true));
+
+			}
 			@Comment({"A whitelist of foods allowed in the nailbox, formatting: [mod id]:[item name]"})
 			public static String[] nailbox_nails = new String[]{};
 		}
@@ -313,4 +352,3 @@ public class Config
 
 		}
 	}
-}

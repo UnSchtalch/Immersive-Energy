@@ -1,6 +1,6 @@
 package crimson_twilight.immersive_energy.common.compat;
 
-import crimson_twilight.immersive_energy.common.Config.IEnConfig;
+import crimson_twilight.immersive_energy.common.config.Config.IEnConfig;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

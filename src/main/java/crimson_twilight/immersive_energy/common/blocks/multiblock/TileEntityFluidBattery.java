@@ -1,6 +1,5 @@
 package crimson_twilight.immersive_energy.common.blocks.multiblock;
 
-import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.IEEnums;
 import blusunrize.immersiveengineering.api.crafting.IMultiblockRecipe;
 import blusunrize.immersiveengineering.api.energy.immersiveflux.FluxStorage;
@@ -53,7 +52,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static crimson_twilight.immersive_energy.common.Config.IEnConfig.Machines.FluidBattery;
+import static crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Machines.FluidBattery;
 
 /**
  * @author Pabilo8

@@ -14,7 +14,7 @@ import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.api.tool.IUpgrade;
 import blusunrize.immersiveengineering.api.tool.IUpgradeableTool;
-import crimson_twilight.immersive_energy.common.Config.IEnConfig.Tools;
+import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Tools;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;

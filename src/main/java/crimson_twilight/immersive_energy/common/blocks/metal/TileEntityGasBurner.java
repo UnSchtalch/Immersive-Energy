@@ -9,7 +9,7 @@ import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.inventory.IIEInventory;
 import crimson_twilight.immersive_energy.api.crafting.GasBurnerRecipe;
 import crimson_twilight.immersive_energy.api.energy.FuelHandler;
-import crimson_twilight.immersive_energy.common.Config.IEnConfig.Machines;
+import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Machines;
 import crimson_twilight.immersive_energy.common.IEnGUIList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;

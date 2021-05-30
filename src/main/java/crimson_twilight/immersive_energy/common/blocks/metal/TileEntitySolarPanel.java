@@ -18,7 +18,7 @@ import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxC
 import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxHandler;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
-import crimson_twilight.immersive_energy.common.Config.IEnConfig.Machines;
+import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Machines;
 import crimson_twilight.immersive_energy.common.compat.IEnCompatModule;
 import crimson_twilight.immersive_energy.common.compat.SereneSeasonsHelper;
 import net.minecraft.block.state.IBlockState;

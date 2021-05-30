@@ -13,7 +13,7 @@ import crimson_twilight.immersive_energy.ImmersiveEnergy;
 import crimson_twilight.immersive_energy.api.IEnMaths;
 import crimson_twilight.immersive_energy.api.IHeatableArmor;
 import crimson_twilight.immersive_energy.client.model.PowerArmorModel;
-import crimson_twilight.immersive_energy.common.Config.IEnConfig.Tools;
+import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Tools;
 import crimson_twilight.immersive_energy.common.IEnContent;
 import crimson_twilight.immersive_energy.common.util.IEnArmorItemStackHandler;
 import net.minecraft.client.util.ITooltipFlag;

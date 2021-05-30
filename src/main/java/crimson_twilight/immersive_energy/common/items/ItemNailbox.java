@@ -10,7 +10,7 @@ import com.google.common.collect.Sets;
 import crimson_twilight.immersive_energy.ImmersiveEnergy;
 import crimson_twilight.immersive_energy.api.tool.NailboxHandler;
 import crimson_twilight.immersive_energy.common.CommonProxy;
-import crimson_twilight.immersive_energy.common.Config;
+import crimson_twilight.immersive_energy.common.config.Config;
 import crimson_twilight.immersive_energy.common.IEnContent;
 import crimson_twilight.immersive_energy.common.IEnGUIList;
 import net.minecraft.client.resources.I18n;

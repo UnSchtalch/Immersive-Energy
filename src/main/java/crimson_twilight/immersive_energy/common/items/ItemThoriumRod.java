@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
-import crimson_twilight.immersive_energy.common.Config.IEnConfig;
+import crimson_twilight.immersive_energy.common.config.Config.IEnConfig;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;

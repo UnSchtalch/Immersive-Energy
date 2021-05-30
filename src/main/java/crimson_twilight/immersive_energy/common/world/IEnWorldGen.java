@@ -7,9 +7,8 @@ import java.util.Random;
 
 import com.google.common.collect.ArrayListMultimap;
 
-import blusunrize.immersiveengineering.common.util.IELogger;
-import crimson_twilight.immersive_energy.common.Config.IEnConfig;
-import crimson_twilight.immersive_energy.common.Config.IEnConfig.Ores;
+import crimson_twilight.immersive_energy.common.config.Config.IEnConfig;
+import crimson_twilight.immersive_energy.common.config.Config.IEnConfig.Ores;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
