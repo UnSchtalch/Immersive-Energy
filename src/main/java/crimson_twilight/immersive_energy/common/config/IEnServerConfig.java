@@ -15,14 +15,18 @@ import blusunrize.immersiveengineering.common.world.IEWorldGen;
 import crimson_twilight.immersive_energy.ImmersiveEnergy;
 import crimson_twilight.immersive_energy.api.energy.FuelHandler;
 import crimson_twilight.immersive_energy.common.compat.IEnCompatModule;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.config.Config.RangeInt;
 import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidRegistry;
 
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.config.ModConfig.ModConfigEvent;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistry;
 
 @EventBusSubscriber(modid = ImmersiveEnergy.MODID, bus = Bus.MOD)
 
@@ -203,101 +207,9 @@ public class IEnServerConfig
 
 		}
 
-		public static void preInit(FMLPreInitializationEvent event)
-		{
-			onConfigUpdate();
-		}
-		
-		private static void onConfigUpdate() 
-		{
-			
-		}
-
-		public static void validateAndMapValues(Class confClass)
-		{
-			for(Field f : confClass.getDeclaredFields())
-			{
-				if(!Modifier.isStatic(f.getModifiers()))
-					continue;
-				Mapped mapped = f.getAnnotation(Mapped.class);
-				if(mapped!=null)
-					try
-					{
-						Class c = mapped.mapClass();
-						if(c!=null)
-						{
-							Field mapField = c.getDeclaredField(mapped.mapName());
-							if(mapField!=null)
-							{
-								Map map = (Map)mapField.get(null);
-								if(map!=null)
-									map.put(f.getName(), f.get(null));
-							}
-						}
-					} catch(Exception e)
-					{
-						e.printStackTrace();
-					}
-				else if(f.getAnnotation(SubConfig.class)!=null)
-					validateAndMapValues(f.getType());
-				else if(f.getAnnotation(RangeDouble.class)!=null)
-					try
-					{
-						RangeDouble range = f.getAnnotation(RangeDouble.class);
-						Object valObj = f.get(null);
-						double val;
-						if(valObj instanceof Double)
-							val = (double)valObj;
-						else
-							val = (float)valObj;
-						if(val < range.min())
-							f.set(null, range.min());
-						else if(val > range.max())
-							f.set(null, range.max());
-					} catch(IllegalAccessException e)
-					{
-						e.printStackTrace();
-					}
-				else if(f.getAnnotation(RangeInt.class)!=null)
-					try
-					{
-						RangeInt range = f.getAnnotation(RangeInt.class);
-						int val = (int)f.get(null);
-						if(val < range.min())
-							f.set(null, range.min());
-						else if(val > range.max())
-							f.set(null, range.max());
-					} catch(IllegalAccessException e)
-					{
-						e.printStackTrace();
-					}
-			}
-		}
-
-		@Retention(RetentionPolicy.RUNTIME)
-		@Target(ElementType.FIELD)
-		public @interface Mapped
-		{
-			
-			Class mapClass();
-
-			String mapName();
-		}
-
-		@Retention(RetentionPolicy.RUNTIME)
-		@Target(ElementType.FIELD)
-		public @interface SubConfig
-		{
-		}
-
 		@SubscribeEvent
-		public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent ev)
-		{
-			if(ev.getModID().equals(ImmersiveEnergy.MODID))
-			{
-				ConfigManager.sync(ImmersiveEnergy.MODID, net.minecraftforge.common.config.Config.Type.INSTANCE);
-				onConfigUpdate();
-			}
+		public static void onConfigReload(ModConfigEvent ev){
+
 		}
 		
 		public static void addBurnerFuel(String[] fuels)
@@ -338,9 +250,10 @@ public class IEnServerConfig
 					else
 					{
 						fluid = fluid.toLowerCase(Locale.ENGLISH);
-						if (FluidRegistry.getFluid(fluid) != null)
+						ResourceLocation fluidRL = new ResourceLocation(fluid);
+						if (ForgeRegistries.FLUIDS.containsKey(fluidRL))
 						{
-							FuelHandler.registerGasBurnerFuel(FluidRegistry.getFluid(fluid), amount);
+							FuelHandler.registerGasBurnerFuel(fluidRL, amount);
 						}
 						else 
 						{
