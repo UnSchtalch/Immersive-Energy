@@ -1,82 +1,107 @@
 package crimson_twilight.immersive_energy.common.blocks.metal;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
+import blusunrize.immersiveengineering.api.IEEnums;
 import blusunrize.immersiveengineering.api.IEEnums.SideConfig;
+import blusunrize.immersiveengineering.api.TargetingInfo;
 import blusunrize.immersiveengineering.api.energy.immersiveflux.FluxStorage;
-import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
-import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
-import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.AbstractConnection;
-import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
-import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConnectable;
+import blusunrize.immersiveengineering.api.wires.*;
+import blusunrize.immersiveengineering.api.wires.ImmersiveNetHandler.AbstractConnection;
+import blusunrize.immersiveengineering.api.wires.ImmersiveNetHandler.Connection;
+import blusunrize.immersiveengineering.api.wires.IImmersiveConnectable;
+import blusunrize.immersiveengineering.api.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.client.models.IOBJModelCallback;
 import blusunrize.immersiveengineering.common.Config.IEConfig;
+import blusunrize.immersiveengineering.common.blocks.IEBaseTileEntity;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.ITileDrop;
 import blusunrize.immersiveengineering.common.blocks.metal.TileEntityConnectorMV;
+import blusunrize.immersiveengineering.common.util.DirectionUtils;
 import blusunrize.immersiveengineering.common.util.EnergyHelper.IEForgeEnergyWrapper;
 import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxConnector;
 import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxHandler;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
+import com.google.common.collect.ImmutableList;
 import crimson_twilight.immersive_energy.common.config.IEnServerConfig.Machines;
 import crimson_twilight.immersive_energy.common.compat.IEnCompatModule;s
 import crimson_twilight.immersive_energy.common.compat.SereneSeasonsHelper;
 import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vector3d;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
 
-public class TileEntitySolarPanel extends TileEntityImmersiveConnectable implements IDirectionalTile, ITickable, IIEInternalFluxHandler, ITileDrop, IIEInternalFluxConnector, IOBJModelCallback<IBlockState> {
+public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersiveConnectable, IDirectionalTile, IIEInternalFluxHandler, ITileDrop, IIEInternalFluxConnector, IOBJModelCallback<BlockState> {
 
     public boolean active;
     private int energyGeneration;
-    public EnumFacing facing = EnumFacing.NORTH;
+    public Direction facing = Direction.NORTH;
 
 
-    @Override
-    public void readCustomNBT(NBTTagCompound nbt, boolean descPacket) {
-        facing = EnumFacing.getFront(nbt.getInteger("facing"));
+    public  TileEntitySolarPanel ()
+    {
+
+
+    }
+    public void readCustomNBT(CompoundNBT nbt, boolean descPacket)
+    {
+
+        facing = Direction.byIndex (nbt.getInt("facing"));
         active = nbt.getBoolean("active");
         energyStorage.readFromNBT(nbt);
-
-        if (descPacket)
-            this.markContainingBlockForUpdate(null);
     }
 
+    /*
     @Override
     public void writeCustomNBT(NBTTagCompound nbt, boolean descPacket) {
         nbt.setInteger("facing", facing.ordinal());
         nbt.setBoolean("active", active);
         energyStorage.writeToNBT(nbt);
     }
+*/
+
+    public void writeCustomNBT(CompoundNBT nbt, boolean descPacket)
+    {
+        nbt.putInt("facing", facing.getIndex());
+        nbt.putBoolean("active", active);
+        energyStorage.writeToNBT(nbt);
+    }
 
     @Override
-    public EnumFacing getFacing() {
-        if (facing == EnumFacing.DOWN || facing == EnumFacing.UP) {
-            facing = EnumFacing.NORTH;
+    public Direction getFacing() {
+        if (facing == Direction.DOWN || facing == Direction.UP) {
+            facing = Direction.NORTH;
         }
         return facing;
     }
 
     @Override
-    public void setFacing(EnumFacing facing) {
-        if (facing == EnumFacing.DOWN || facing == EnumFacing.UP) {
-            facing = EnumFacing.NORTH;
+    public void setFacing(Direction facing) {
+        if (facing == Direction.DOWN || facing == Direction.UP) {
+            facing = Direction.NORTH;
         }
         this.facing = facing;
     }
@@ -92,22 +117,22 @@ public class TileEntitySolarPanel extends TileEntityImmersiveConnectable impleme
     }
 
     @Override
-    public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
+    public boolean canHammerRotate(Direction side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
         return true;
     }
 
     @Override
-    public boolean canRotate(EnumFacing axis) {
+    public boolean canRotate(Direction axis) {
         return true;
     }
 
     @Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+    public <T> T getCapability(Capability<T> capability, Direction facing) {
         return super.getCapability(capability, facing);
     }
 
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+    public boolean hasCapability(Capability<?> capability, Direction facing) {
         return super.hasCapability(capability, facing);
     }
 
@@ -169,20 +194,6 @@ public class TileEntitySolarPanel extends TileEntityImmersiveConnectable impleme
     }
 
     private float calculateVanillaModifier(World world, Biome biome, float modifier) {
-        switch (biome.getTempCategory()) {
-            case OCEAN:
-                modifier *= 1.1f;
-                break;
-            case COLD:
-                modifier *= 0.7f;
-                break;
-            case MEDIUM:
-                modifier *= 1f;
-                break;
-            case WARM:
-                modifier *= 1.3f;
-                break;
-        }
         return modifier;
     }
 
@@ -193,8 +204,8 @@ public class TileEntitySolarPanel extends TileEntityImmersiveConnectable impleme
     }
 
     @Override
-    public void readOnPlacement(EntityLivingBase placer, ItemStack stack) {
-        if (stack.hasTagCompound()) {
+    public void readOnPlacement(LivingEntity placer, ItemStack stack) {
+        if (stack.hasTag()) {
             if (ItemNBTHelper.hasKey(stack, "energyStorage"))
                 energyStorage.setEnergy(ItemNBTHelper.getInt(stack, "energyStorage"));
         }
@@ -202,26 +213,22 @@ public class TileEntitySolarPanel extends TileEntityImmersiveConnectable impleme
 
 
     @Override
-    public ItemStack getTileDrop(EntityPlayer player, IBlockState state) {
-        ItemStack stack = new ItemStack(state.getBlock(), 1, state.getBlock().getMetaFromState(state));
-        NBTTagCompound tag = new NBTTagCompound();
-        if (!tag.hasNoTags())
-            stack.setTagCompound(tag);
-        if (energyStorage.getEnergyStored() > 0)
-            ItemNBTHelper.setInt(stack, "energyStorage", energyStorage.getEnergyStored());
-        return stack;
+    public List<ItemStack> getTileDrops(LootContext context) {
+        ItemStack stack = new ItemStack(getBlockState().getBlock(), 1);
+        writeCustomNBT(stack.getOrCreateTag(), false);
+        return ImmutableList.of(stack);
     }
 
     @Override
-    public Vec3d getRaytraceOffset(IImmersiveConnectable link) {
-        return new Vec3d(0.5f, 0.156f, 0.5f);
+    public Vector3d getRaytraceOffset(IImmersiveConnectable link) {
+        return new Vector3d(0.5f, 0.156f, 0.5f);
     }
 
     @Override
-    public Vec3d getConnectionOffset(Connection con) {
-        EnumFacing side = facing.getOpposite();
+    public Vector3d getConnectionOffset(Connection con, ConnectionPoint point) {
+        Direction side = facing.getOpposite();
         double conRadius = con.cableType.getRenderDiameter()/2;
-        return new Vec3d(.5+side.getFrontOffsetX()*(.0625-conRadius), 0.156f+side.getFrontOffsetY()*(.0625-conRadius), .5+side.getFrontOffsetZ()*(.0625-conRadius));
+        return new Vector3d(.5+side.getFrontOffsetX()*(.0625-conRadius), 0.156f+side.getFrontOffsetY()*(.0625-conRadius), .5+side.getFrontOffsetZ()*(.0625-conRadius));
     }
 
     boolean inICNet = false;
@@ -253,7 +260,7 @@ public class TileEntitySolarPanel extends TileEntityImmersiveConnectable impleme
     IEForgeEnergyWrapper energyWrapper;
 
     @Override
-    public IEForgeEnergyWrapper getCapabilityWrapper(EnumFacing facing) {
+    public IEForgeEnergyWrapper getCapabilityWrapper(Direction facing) {
         if (facing != this.facing || isRelay())
             return null;
         if (energyWrapper == null || energyWrapper.side != this.facing)
@@ -267,17 +274,39 @@ public class TileEntitySolarPanel extends TileEntityImmersiveConnectable impleme
     }
 
     @Override
-    public SideConfig getEnergySideConfig(EnumFacing facing) {
+    public SideConfig getEnergySideConfig(Direction facing) {
         return SideConfig.OUTPUT;
     }
 
     @Override
-    public boolean canConnectEnergy(EnumFacing from) {
+    public boolean canConnect() {
         return false;
     }
 
+
+    public boolean canConnectCable(WireType cableType, ConnectionPoint target, Vector3i offset)
+    {
+        return true;
+    }
+
     @Override
-    public int getEnergyStored(EnumFacing from) {
+    public void connectCable(WireType cableType, ConnectionPoint target, IImmersiveConnectable other, ConnectionPoint otherTarget) {
+        return;
+    }
+
+    @Override
+    public void removeCable(@Nullable Connection connection, ConnectionPoint attachedPoint) {
+        return;
+    }
+
+    @Nullable
+    @Override
+    public ConnectionPoint getTargetedPoint(TargetingInfo info, Vector3i offset) {
+        return null;
+    }
+
+    @Override
+    public int getEnergyStored(Direction from) {
         return energyStorage.getEnergyStored();
     }
 
@@ -286,12 +315,23 @@ public class TileEntitySolarPanel extends TileEntityImmersiveConnectable impleme
     }
 
     @Override
-    public int getMaxEnergyStored(EnumFacing from) {
+    public Collection<ConnectionPoint> getConnectionPoints() {
+        return null;
+    }
+
+    @Override
+    public BlockPos getConnectionMaster(@Nullable WireType cableType, TargetingInfo target)
+    {
+        return this.pos;
+    }
+
+    @Override
+    public int getMaxEnergyStored(Direction from) {
         return getMaxStorage();
     }
 
     @Override
-    public int extractEnergy(EnumFacing from, int energy, boolean simulate) {
+    public int extractEnergy(Direction from, int energy, boolean simulate) {
         return 0;
     }
 

@@ -17,10 +17,8 @@ import crimson_twilight.immersive_energy.api.energy.FuelHandler;
 import crimson_twilight.immersive_energy.common.compat.IEnCompatModule;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.config.Config.RangeInt;
-import net.minecraftforge.common.config.ConfigManager;
+
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidRegistry;
 
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
