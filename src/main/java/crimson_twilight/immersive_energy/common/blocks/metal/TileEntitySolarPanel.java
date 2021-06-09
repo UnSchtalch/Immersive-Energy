@@ -23,6 +23,7 @@ import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxH
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
 import com.google.common.collect.ImmutableList;
+import crimson_twilight.immersive_energy.common.IEnTileTypes;
 import crimson_twilight.immersive_energy.common.config.IEnServerConfig.Machines;
 import crimson_twilight.immersive_energy.common.compat.IEnCompatModule;s
 import crimson_twilight.immersive_energy.common.compat.SereneSeasonsHelper;
@@ -63,8 +64,7 @@ public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersive
 
     public  TileEntitySolarPanel ()
     {
-
-
+        super(IEnTileTypes.SOLAR.get());
     }
     public void readCustomNBT(CompoundNBT nbt, boolean descPacket)
     {
@@ -107,17 +107,16 @@ public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersive
     }
 
     @Override
-    public int getFacingLimitation() {
-        return 2;
+    public PlacementLimitation getFacingLimitation() {
+        return PlacementLimitation.HORIZONTAL;
     }
 
     @Override
-    public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
+    public boolean mirrorFacingOnPlacement(LivingEntity placer) {
         return false;
     }
 
-    @Override
-    public boolean canHammerRotate(Direction side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
+    public boolean canHammerRotate(Direction side, float hitX, float hitY, float hitZ, LivingEntity entity) {
         return true;
     }
 
