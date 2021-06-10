@@ -49,6 +49,7 @@ import net.minecraft.enchantment.EnchantmentDurability;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.BaseAttribute;
@@ -498,7 +499,7 @@ public class ToolHeftyWrench extends ItemUpgradeableTool implements ITool, IItem
 	}
 
 	//Shares code with II, long live IEn-II Cooperation!
-	boolean performHammerFunctions(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand)
+	boolean performHammerFunctions(LivingEntity player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand)
 	{
 		ItemStack stack = player.getHeldItem(hand);
 		try

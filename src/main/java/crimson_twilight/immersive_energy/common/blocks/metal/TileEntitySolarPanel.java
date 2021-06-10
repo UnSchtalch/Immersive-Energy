@@ -2,60 +2,53 @@ package crimson_twilight.immersive_energy.common.blocks.metal;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.IEEnums;
-import blusunrize.immersiveengineering.api.IEEnums.SideConfig;
+import blusunrize.immersiveengineering.api.IEEnums.IOSideConfig;
 import blusunrize.immersiveengineering.api.TargetingInfo;
 import blusunrize.immersiveengineering.api.energy.immersiveflux.FluxStorage;
+import blusunrize.immersiveengineering.api.energy.immersiveflux.IFluxProvider;
+
 import blusunrize.immersiveengineering.api.wires.*;
-import blusunrize.immersiveengineering.api.wires.ImmersiveNetHandler.AbstractConnection;
-import blusunrize.immersiveengineering.api.wires.ImmersiveNetHandler.Connection;
 import blusunrize.immersiveengineering.api.wires.IImmersiveConnectable;
-import blusunrize.immersiveengineering.api.wires.ImmersiveNetHandler;
+
+import blusunrize.immersiveengineering.api.wires.impl.ImmersiveConnectableTileEntity;
 import blusunrize.immersiveengineering.client.models.IOBJModelCallback;
-import blusunrize.immersiveengineering.common.Config.IEConfig;
-import blusunrize.immersiveengineering.common.blocks.IEBaseTileEntity;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.ITileDrop;
-import blusunrize.immersiveengineering.common.blocks.metal.TileEntityConnectorMV;
-import blusunrize.immersiveengineering.common.util.DirectionUtils;
+
+import blusunrize.immersiveengineering.common.config.IEServerConfig;
 import blusunrize.immersiveengineering.common.util.EnergyHelper.IEForgeEnergyWrapper;
-import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxConnector;
+
 import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxHandler;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
+import blusunrize.immersiveengineering.common.wires.IEWireTypes;
 import com.google.common.collect.ImmutableList;
 import crimson_twilight.immersive_energy.common.IEnTileTypes;
-import crimson_twilight.immersive_energy.common.config.IEnServerConfig.Machines;
-import crimson_twilight.immersive_energy.common.compat.IEnCompatModule;s
+import crimson_twilight.immersive_energy.common.compat.IEnCompatModule;
 import crimson_twilight.immersive_energy.common.compat.SereneSeasonsHelper;
 import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ITickable;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vector3d;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.common.util.LazyOptional;
+
 
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersiveConnectable, IDirectionalTile, IIEInternalFluxHandler, ITileDrop, IIEInternalFluxConnector, IOBJModelCallback<BlockState> {
+public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity implements IImmersiveConnectable,  ITickableTileEntity, IDirectionalTile, IIEInternalFluxHandler, ITileDrop, IFluxProvider, IOBJModelCallback<BlockState> {
 
     public boolean active;
     private int energyGeneration;
@@ -116,7 +109,7 @@ public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersive
         return false;
     }
 
-    public boolean canHammerRotate(Direction side, float hitX, float hitY, float hitZ, LivingEntity entity) {
+    public boolean canHammerRotate(Direction side, Vector3d hit, LivingEntity entity) {
         return true;
     }
 
@@ -126,20 +119,32 @@ public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersive
     }
 
     @Override
-    public <T> T getCapability(Capability<T> capability, Direction facing) {
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction facing) {
         return super.getCapability(capability, facing);
     }
-
+/*
     @Override
     public boolean hasCapability(Capability<?> capability, Direction facing) {
         return super.hasCapability(capability, facing);
     }
 
+
+*/
+
     @Override
-    public void update() {
+    public void markDirty(){
+        super.markDirty();
+
+        BlockState state = world.getBlockState(pos);
+        world.notifyBlockUpdate(pos, state, state, 3);
+        world.notifyNeighborsOfStateChange(pos, state.getBlock());
+    }
+
+    @Override
+    public void tick() {
         energyGeneration = IEnServerConfig.MACHINES.base_solar.get();
         if (!world.isRemote) {
-            markContainingBlockForUpdate(null);
+            markDirty();
         }
         active = false;
         if (world.isDaytime() && world.canBlockSeeSky(getPos())) {
@@ -149,20 +154,20 @@ public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersive
             float f1 = f < (float) Math.PI ? 0.0F : ((float) Math.PI * 2F);
             f = f + (f1 - f) * 0.2F;
             modifier = modifier * MathHelper.cos(f);
-            modifier = modifier * (world.getActualHeight() / world.getHeight());
+            modifier = modifier * (pos.getY() / world.getHeight());
             Biome biome = world.getBiome(pos);
 
             modifier = IEnCompatModule.serene ? SereneSeasonsHelper.calculateModifier(world, biome, modifier) : calculateVanillaModifier(world, biome, modifier);
 
-            if (world.isRaining() && world.getBiome(pos).getTempCategory() != Biome.TempCategory.WARM) {
+            if (world.isRaining()) {
                 modifier = modifier * 0.01f / world.rainingStrength;
             }
 
-            if (world.isRaining() && world.getBiome(pos).getTempCategory() == Biome.TempCategory.WARM) {
+            if (world.isRaining()) {
                 modifier = modifier * 0.9f;
             }
 
-            if (world.isThundering() && world.getBiome(pos).getTempCategory() != Biome.TempCategory.WARM) {
+            if (world.isThundering() ) {
                 modifier = modifier * 0.001f;
             }
 
@@ -186,7 +191,7 @@ public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersive
                 if (conns != null)
                     for (Connection conn : conns)
                         if (pos.compareTo(conn.end) < 0 && world.isBlockLoaded(conn.end))
-                            this.markContainingBlockForUpdate(null);
+                            this.markDirty();
                 firstTick = false;
             }
         }
@@ -236,31 +241,12 @@ public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersive
 
     boolean firstTick = true;
 
-    @Override
-    public boolean isEnergyOutput() {
-        return false;
-    }
-
-    @Override
-    public int outputEnergy(int amount, boolean simulate, int energyType) {
-        return 0;
-    }
-
-    @Override
-    protected boolean canTakeLV() {
-        return true;
-    }
-
-    @Override
-    protected boolean canTakeMV() {
-        return true;
-    }
 
     IEForgeEnergyWrapper energyWrapper;
 
     @Override
     public IEForgeEnergyWrapper getCapabilityWrapper(Direction facing) {
-        if (facing != this.facing || isRelay())
+        if (facing != this.facing)
             return null;
         if (energyWrapper == null || energyWrapper.side != this.facing)
             energyWrapper = new IEForgeEnergyWrapper(this, this.facing);
@@ -273,8 +259,8 @@ public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersive
     }
 
     @Override
-    public SideConfig getEnergySideConfig(Direction facing) {
-        return SideConfig.OUTPUT;
+    public IOSideConfig getEnergySideConfig(Direction facing) {
+        return IOSideConfig.OUTPUT;
     }
 
     @Override
@@ -304,11 +290,6 @@ public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersive
         return null;
     }
 
-    @Override
-    public int getEnergyStored(Direction from) {
-        return energyStorage.getEnergyStored();
-    }
-
     private int getMaxStorage() {
         return IEnServerConfig.MACHINES.storage_solar.get();
     }
@@ -324,22 +305,16 @@ public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersive
         return this.pos;
     }
 
-    @Override
-    public int getMaxEnergyStored(Direction from) {
-        return getMaxStorage();
-    }
 
-    @Override
-    public int extractEnergy(Direction from, int energy, boolean simulate) {
-        return 0;
-    }
 
     public int getMaxInput() {
-        return TileEntityConnectorMV.connectorInputValues[1];
+        //Sorry Blu
+        return	IEServerConfig.WIRES.energyWireConfigs.get(IEWireTypes.IEWireType.ELECTRUM).connectorRate.get();
     }
 
     public int getMaxOutput() {
-        return TileEntityConnectorMV.connectorInputValues[1];
+        //Sorry Blu
+        return	IEServerConfig.WIRES.energyWireConfigs.get(IEWireTypes.IEWireType.ELECTRUM).connectorRate.get();
     }
 
     public int transferEnergy(int energy, boolean simulate, final int energyType) {
@@ -408,4 +383,18 @@ public class TileEntitySolarPanel extends IEBaseTileEntity implements IImmersive
         return received;
     }
 
+    @Override
+    public int extractEnergy(@Nullable Direction from, int energy, boolean simulate) {
+        return  energyStorage.extractEnergy(energy, simulate);
+    }
+
+    @Override
+    public int getEnergyStored(@Nullable Direction from) {
+        return energyStorage.getEnergyStored();
+    }
+
+    @Override
+    public int getMaxEnergyStored(@Nullable Direction from) {
+        return getMaxStorage();
+    }
 }

@@ -13,7 +13,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.item.ItemArrow;
+import net.minecraft.item.ArrowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -23,7 +23,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /*
 Thanks to Darkhax's Simply Arrows for the basis of this.
 */
-public class IEnArrowBase extends ItemArrow
+public class IEnArrowBase extends ArrowItem
 {
 	private boolean infinity = true;
 	private int damage = 2;
@@ -45,8 +45,8 @@ public class IEnArrowBase extends ItemArrow
 		this.dropItem = new ItemStack(this);
 		IEnContent.registeredIEnItems.add(this);
 	}
-    
-	public IEnArrowBase(String name, int stackSize, String... logic_desc) 
+
+	public IEnArrowBase(String name, int stackSize, String... logic_desc)
 	{
 		this.setUnlocalizedName(ImmersiveEnergy.MODID+"."+name);
 		this.setCreativeTab(ImmersiveEnergy.creativeTab);
@@ -76,7 +76,7 @@ public class IEnArrowBase extends ItemArrow
 	}
 
     @Override
-    public EntityArrow createArrow(World world, ItemStack stack, EntityLivingBase shooter) 
+    public EntityArrow createArrow(World world, ItemStack stack, EntityLivingBase shooter)
     {
         final EntityIEnArrow arrow = new EntityIEnArrow(world, this.dropItem.copy(), shooter).setIgnoreInvulnerability(this.ignore_invulnerability);
         arrow.setLogic(this.logic);
