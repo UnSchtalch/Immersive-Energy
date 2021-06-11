@@ -15,6 +15,7 @@ import blusunrize.immersiveengineering.client.models.IOBJModelCallback;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.ITileDrop;
 
+import blusunrize.immersiveengineering.common.config.IEClientConfig;
 import blusunrize.immersiveengineering.common.config.IEServerConfig;
 import blusunrize.immersiveengineering.common.util.EnergyHelper.IEForgeEnergyWrapper;
 
@@ -27,6 +28,7 @@ import crimson_twilight.immersive_energy.common.IEnTileTypes;
 import crimson_twilight.immersive_energy.common.compat.IEnCompatModule;
 import crimson_twilight.immersive_energy.common.compat.SereneSeasonsHelper;
 import crimson_twilight.immersive_energy.common.config.IEnServerConfig;
+import javafx.geometry.Side;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -53,6 +55,8 @@ public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity impleme
     public boolean active;
     private int energyGeneration;
     public Direction facing = Direction.NORTH;
+    protected WireType wireType;
+    HashMap<Connection, boolean> Connections;
 
 
     public  TileEntitySolarPanel ()
@@ -158,7 +162,7 @@ public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity impleme
             Biome biome = world.getBiome(pos);
 
             modifier = IEnCompatModule.serene ? SereneSeasonsHelper.calculateModifier(world, biome, modifier) : calculateVanillaModifier(world, biome, modifier);
-
+            //Would need rework for climate integration later on
             if (world.isRaining()) {
                 modifier = modifier * 0.01f / world.rainingStrength;
             }
@@ -177,22 +181,15 @@ public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity impleme
                 } else {
                     energyStorage.modifyEnergyStored((int) (energyGeneration * modifier));
                 }
-
-                if (energyStorage.getEnergyStored() > 0) {
+//FIXME - allow Solar panel to be stack in grids
+            /*    if (energyStorage.getEnergyStored() > 0) {
                     int temp = this.transferEnergy(energyStorage.getEnergyStored(), true, 0);
                     if (temp > 0) {
                         energyStorage.modifyEnergyStored(-this.transferEnergy(temp, false, 0));
                         markDirty();
                     }
-                }
+                }*/
                 currentTickAccepted = 0;
-            } else if (firstTick) {
-                Set<Connection> conns = ImmersiveNetHandler.INSTANCE.getConnections(world, pos);
-                if (conns != null)
-                    for (Connection conn : conns)
-                        if (pos.compareTo(conn.end) < 0 && world.isBlockLoaded(conn.end))
-                            this.markDirty();
-                firstTick = false;
             }
         }
     }
@@ -202,9 +199,8 @@ public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity impleme
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
     public double getMaxRenderDistanceSquared() {
-        return super.getMaxRenderDistanceSquared() * IEConfig.increasedTileRenderdistance;
+        return super.getMaxRenderDistanceSquared() * IEClientConfig.increasedTileRenderdistance.get();
     }
 
     @Override
@@ -222,17 +218,20 @@ public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity impleme
         writeCustomNBT(stack.getOrCreateTag(), false);
         return ImmutableList.of(stack);
     }
-
+/*
     @Override
     public Vector3d getRaytraceOffset(IImmersiveConnectable link) {
         return new Vector3d(0.5f, 0.156f, 0.5f);
-    }
+    }*/
 
     @Override
     public Vector3d getConnectionOffset(Connection con, ConnectionPoint point) {
-        Direction side = facing.getOpposite();
-        double conRadius = con.cableType.getRenderDiameter()/2;
-        return new Vector3d(.5+side.getFrontOffsetX()*(.0625-conRadius), 0.156f+side.getFrontOffsetY()*(.0625-conRadius), .5+side.getFrontOffsetZ()*(.0625-conRadius));
+
+        float xo = facing.getDirectionVec().getX() * .5f + .5f;
+        float yo = facing.getDirectionVec().getY() * .5f + 0.156f;
+        float zo = facing.getDirectionVec().getZ() * .5f + .5f;
+
+        return new Vector3d(xo,yo,zo);
     }
 
     boolean inICNet = false;
@@ -265,29 +264,33 @@ public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity impleme
 
     @Override
     public boolean canConnect() {
-        return false;
+        return true;
     }
 
 
-    public boolean canConnectCable(WireType cableType, ConnectionPoint target, Vector3i offset)
-    {
-        return true;
+    public boolean canConnectCable(WireType cableType, ConnectionPoint target, Vector3i offset) {
+        if(world.getBlockState(target.getPosition()).getBlock() != world.getBlockState(getPos()).getBlock()){
+            return false;
+        }
+        return this.wireType == null && (cableType.getCategory().equals(WireType.LV_CATEGORY) || cableType.getCategory().equals(WireType.MV_CATEGORY));
     }
 
     @Override
     public void connectCable(WireType cableType, ConnectionPoint target, IImmersiveConnectable other, ConnectionPoint otherTarget) {
-        return;
+        this.wireType = cableType;
+        markDirty();
     }
 
     @Override
     public void removeCable(@Nullable Connection connection, ConnectionPoint attachedPoint) {
-        return;
+        this.wireType = null;
+        markDirty();
     }
 
     @Nullable
     @Override
     public ConnectionPoint getTargetedPoint(TargetingInfo info, Vector3i offset) {
-        return null;
+        return new ConnectionPoint(pos, 0);
     }
 
     private int getMaxStorage() {
@@ -296,7 +299,7 @@ public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity impleme
 
     @Override
     public Collection<ConnectionPoint> getConnectionPoints() {
-        return null;
+        return Arrays.asList(new ConnectionPoint(pos, 0));
     }
 
     @Override
@@ -316,8 +319,10 @@ public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity impleme
         //Sorry Blu
         return	IEServerConfig.WIRES.energyWireConfigs.get(IEWireTypes.IEWireType.ELECTRUM).connectorRate.get();
     }
-
+/*
     public int transferEnergy(int energy, boolean simulate, final int energyType) {
+        co
+
         int received = 0;
         if (!world.isRemote) {
             Set<AbstractConnection> outputs = ImmersiveNetHandler.INSTANCE.getIndirectEnergyConnections(Utils.toCC(this), world);
@@ -367,6 +372,7 @@ public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity impleme
                                 ImmersiveNetHandler.INSTANCE.getTransferedRates(world.provider.getDimension()).put(sub, transferredPerCon);
                                 IImmersiveConnectable subStart = ApiUtils.toIIC(sub.start, world);
                                 IImmersiveConnectable subEnd = ApiUtils.toIIC(sub.end, world);
+
                                 if (subStart != null && passedConnectors.add(subStart))
                                     subStart.onEnergyPassthrough((int) (r - r * intermediaryLoss));
                                 if (subEnd != null && passedConnectors.add(subEnd))
@@ -382,7 +388,7 @@ public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity impleme
         }
         return received;
     }
-
+*/
     @Override
     public int extractEnergy(@Nullable Direction from, int energy, boolean simulate) {
         return  energyStorage.extractEnergy(energy, simulate);
