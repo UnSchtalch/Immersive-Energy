@@ -56,8 +56,6 @@ public class TileEntitySolarPanel extends ImmersiveConnectableTileEntity impleme
     private int energyGeneration;
     public Direction facing = Direction.NORTH;
     protected WireType wireType;
-    HashMap<Connection, boolean> Connections;
-
 
     public  TileEntitySolarPanel ()
     {
