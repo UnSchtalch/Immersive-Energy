@@ -250,7 +250,7 @@ public class EventHandler
 			}
 			if(!player.isPassenger()&&(player.moveStrafing!=0||player.moveForward!=0)&&energy > 5)
 			{
-				iattributeinstance.applyModifier(POWER_ARMOR_SPEED_BOOST);
+				iattributeinstance.applyPersistentModifier(POWER_ARMOR_SPEED_BOOST) ;
 				EnergyHelper.extractFlux(player.getItemStackFromSlot(EquipmentSlotType.CHEST), 5, false);
 			}
 		}
@@ -345,7 +345,8 @@ public class EventHandler
 					}
 					if(projectile.getDamage() <= 15)
 					{
-						armor.damageItem(itemDamage, entity, );
+						armor.damageItem(itemDamage, entity,(user) -> {
+							user.sendBreakAnimation(user.getActiveHand() );});
 						playReflectSound(entity);
 						projectile.shoot(projectile.getMotion().x*-1, projectile.getMotion().y, projectile.getMotion().z*-1, 0.3f, 0.2f);
 						projectile.setShooter(entity);
@@ -354,7 +355,8 @@ public class EventHandler
 					else
 					{
 						projectile.setDamage(projectile.getDamage()-15);
-						armor.damageItem(250, entity);
+						armor.damageItem(250, entity,(user) -> {
+							user.sendBreakAnimation(user.getActiveHand() );});
 						playPirceSound(entity);
 					}
 				}

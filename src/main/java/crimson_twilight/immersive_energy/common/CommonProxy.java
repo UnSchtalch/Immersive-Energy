@@ -7,8 +7,7 @@ import javax.annotation.Nonnull;
 import com.mojang.authlib.GameProfile;
 import blusunrize.immersiveengineering.common.gui.GuiHandler;
 
-import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IGuiTile;
-import blusunrize.immersiveengineering.common.items.IEItemInterfaces.IGuiItem;
+
 import crimson_twilight.immersive_energy.ImmersiveEnergy;
 import crimson_twilight.immersive_energy.common.blocks.metal.TileEntityGasBurner;
 import crimson_twilight.immersive_energy.common.blocks.multiblock.TileEntityFluidBattery;
@@ -75,10 +74,6 @@ public class CommonProxy
 		
 	}
 
-	public static <T extends TileEntity & IGuiTile> void openGuiForTile(@Nonnull PlayerEntity player, @Nonnull T tile)
-	{
-		//player.openGui(ImmersiveEnergy.instance, tile.getGuiID(), tile.getWorld(), tile.getPos().getX(), tile.getPos().getY(), tile.getPos().getZ());
-	}
 /*
 	public static void openGuiForItem(@Nonnull EntityPlayer player, @Nonnull EntityEquipmentSlot slot)
 	{
