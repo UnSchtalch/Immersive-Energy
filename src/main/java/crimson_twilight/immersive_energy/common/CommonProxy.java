@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 
 import com.mojang.authlib.GameProfile;
+import blusunrize.immersiveengineering.common.gui.GuiHandler;
 
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IGuiTile;
 import blusunrize.immersiveengineering.common.items.IEItemInterfaces.IGuiItem;
@@ -18,21 +19,20 @@ import crimson_twilight.immersive_energy.common.gui.ContainerNailbox;
 import crimson_twilight.immersive_energy.common.items.ItemNailbox;
 import crimson_twilight.immersive_energy.common.util.IEnKeybinds;
 import crimson_twilight.immersive_energy.common.util.network.IEnPacketHandler;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.sound.SoundEvent;
-import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.IGuiHandler;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 
-public class CommonProxy implements IGuiHandler
+public class CommonProxy
 {
 	public void preInit()
 	{
@@ -75,11 +75,11 @@ public class CommonProxy implements IGuiHandler
 		
 	}
 
-	public static <T extends TileEntity & IGuiTile> void openGuiForTile(@Nonnull EntityPlayer player, @Nonnull T tile)
+	public static <T extends TileEntity & IGuiTile> void openGuiForTile(@Nonnull PlayerEntity player, @Nonnull T tile)
 	{
-		player.openGui(ImmersiveEnergy.instance, tile.getGuiID(), tile.getWorld(), tile.getPos().getX(), tile.getPos().getY(), tile.getPos().getZ());
+		//player.openGui(ImmersiveEnergy.instance, tile.getGuiID(), tile.getWorld(), tile.getPos().getX(), tile.getPos().getY(), tile.getPos().getZ());
 	}
-
+/*
 	public static void openGuiForItem(@Nonnull EntityPlayer player, @Nonnull EntityEquipmentSlot slot)
 	{
 		ItemStack stack = player.getItemStackFromSlot(slot);
@@ -88,13 +88,17 @@ public class CommonProxy implements IGuiHandler
 		IGuiItem gui = (IGuiItem)stack.getItem();
 		player.openGui(ImmersiveEnergy.instance, 100*slot.ordinal()+gui.getGuiID(stack), player.world, (int)player.posX, (int)player.posY, (int)player.posZ);
 	}
+*/
 
+	/*
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z)
 	{
 		return null;
 	}
+*/
 
+/*
 	@SuppressWarnings("unused")
 	@Override
 	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z)
@@ -120,7 +124,7 @@ public class CommonProxy implements IGuiHandler
 		}
 		return null;
 	}
-
+*/
 	public void handleTileSound(SoundEvent soundEvent, TileEntity tile, boolean tileActive, float volume, float pitch)
 	{
 	}
@@ -145,7 +149,7 @@ public class CommonProxy implements IGuiHandler
 	{
 	}
 
-	public void spawnFractalFX(World world, double x, double y, double z, Vec3d direction, double scale, int prefixColour, float[][] colour)
+	public void spawnFractalFX(World world, double x, double y, double z, Vector3d direction, double scale, int prefixColour, float[][] colour)
 	{
 	}
 
@@ -162,7 +166,7 @@ public class CommonProxy implements IGuiHandler
 		return false;
 	}
 
-	public boolean drawConveyorInGui(String conveyor, EnumFacing facing)
+	public boolean drawConveyorInGui(String conveyor, Direction facing)
 	{
 		return false;
 	}
@@ -181,27 +185,16 @@ public class CommonProxy implements IGuiHandler
 		return null;
 	}
 
-	public EntityPlayer getClientPlayer()
+	public PlayerEntity getClientPlayer()
 	{
 		return null;
 	}
 
-	public String getNameFromUUID(String uuid)
-	{
-		return FMLCommonHandler.instance().getMinecraftServerInstance().getMinecraftSessionService().fillProfileProperties(new GameProfile(UUID.fromString(uuid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5")), null), false).getName();
-	}
 
 	public void reInitGui()
 	{
 	}
 
-	public void removeStateFromSmartModelCache(IExtendedBlockState state)
-	{
-	}
-
-	public void removeStateFromConnectionModelCache(IExtendedBlockState state)
-	{
-	}
 
 	public void clearConnectionModelCache()
 	{

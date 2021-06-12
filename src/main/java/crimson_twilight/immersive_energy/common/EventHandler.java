@@ -1,12 +1,6 @@
 package crimson_twilight.immersive_energy.common;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Random;
-import java.util.UUID;
-import java.util.WeakHashMap;
+import java.util.*;
 
 import blusunrize.immersiveengineering.common.util.EnergyHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
@@ -15,47 +9,46 @@ import crimson_twilight.immersive_energy.common.util.IEnDamageSources;
 import javafx.util.Pair;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.furnace.FurnaceFuelBurnTimeEvent;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+
 
 @Mod.EventBusSubscriber(modid = ImmersiveEnergy.MODID)
 public class EventHandler
 {
 	public static final Queue<Pair<Integer, BlockPos>> requestedBlockUpdates = new LinkedList<>();
 	private static final UUID POWER_ARMOR_SPEED_BOOST_ID = UUID.fromString("eba4c34c-c7d9-11e9-a32f-2a2ae2dbcce4");
-	private static final AttributeModifier POWER_ARMOR_SPEED_BOOST = new AttributeModifier(POWER_ARMOR_SPEED_BOOST_ID, "Power Armor Speed Boost", 0.4D, 2);
-	public static final Map<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
+	private static final AttributeModifier POWER_ARMOR_SPEED_BOOST = new AttributeModifier(POWER_ARMOR_SPEED_BOOST_ID, "Power Armor Speed Boost", 0.4D, AttributeModifier.Operation.byId(2));
+	public static final Map<PlayerEntity, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
     private static int oldDisplayWidth = 0;
     private static int oldDisplayHeight = 0;
     public static boolean resetShaders = false;
@@ -96,12 +89,12 @@ public class EventHandler
 	@SubscribeEvent
 	public static void onLivingTick(LivingEvent.LivingUpdateEvent event)
 	{
-		EntityLivingBase entity = event.getEntityLiving();
+		LivingEntity entity = event.getEntityLiving();
 		ItemStack head, body, legs, boots;
-		boots = entity.getItemStackFromSlot(EntityEquipmentSlot.FEET);
-		legs = entity.getItemStackFromSlot(EntityEquipmentSlot.LEGS);
-		body = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
-		head = entity.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
+		boots = entity.getItemStackFromSlot(EquipmentSlotType.FEET);
+		legs = entity.getItemStackFromSlot(EquipmentSlotType.LEGS);
+		body = entity.getItemStackFromSlot(EquipmentSlotType.CHEST);
+		head = entity.getItemStackFromSlot(EquipmentSlotType.HEAD);
 		int suitHeatDamage = 0;
 		if(boots.getItem().equals(IEnContent.itemPowerArmorBoots) && IEnContent.itemPowerArmorBoots.getHeat(boots) > IEnContent.itemPowerArmorBoots.getMaxHeat(boots))
 		{
@@ -119,7 +112,7 @@ public class EventHandler
 		{
 			suitHeatDamage += MathHelper.ceil(((double)(IEnContent.itemPowerArmorHelmet.getHeat(head) - IEnContent.itemPowerArmorHelmet.getMaxHeat(head))/100d));
 		}
-		if(suitHeatDamage > 0 && entity.getEntityWorld().getTotalWorldTime()%20==0)
+		if(suitHeatDamage > 0 && entity.getEntityWorld().getGameTime()%20==0)
 		{
 			entity.attackEntityFrom(IEnDamageSources.causeBurningSuitDamage(), suitHeatDamage);
 		}
@@ -128,12 +121,12 @@ public class EventHandler
 	@SubscribeEvent
 	public static void onLivingAttacked(LivingAttackEvent event)
 	{
-		EntityLivingBase entity = event.getEntityLiving();
+		LivingEntity entity = event.getEntityLiving();
 		ItemStack head, body, legs, boots;
-		boots = entity.getItemStackFromSlot(EntityEquipmentSlot.FEET);
-		legs = entity.getItemStackFromSlot(EntityEquipmentSlot.LEGS);
-		body = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
-		head = entity.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
+		boots = entity.getItemStackFromSlot(EquipmentSlotType.FEET);
+		legs = entity.getItemStackFromSlot(EquipmentSlotType.LEGS);
+		body = entity.getItemStackFromSlot(EquipmentSlotType.CHEST);
+		head = entity.getItemStackFromSlot(EquipmentSlotType.HEAD);
 
 		if(boots.getItem().equals(IEnContent.itemPowerArmorBoots)
 				&&legs.getItem().equals(IEnContent.itemPowerArmorLegs)
@@ -201,15 +194,15 @@ public class EventHandler
 	@SubscribeEvent
 	public static void hurtEvent(LivingHurtEvent event)
 	{
-		EntityLivingBase entity = event.getEntityLiving();
-		if(event.getSource()==DamageSource.FALL&&entity.getItemStackFromSlot(EntityEquipmentSlot.FEET).getItem().equals(IEnContent.itemPowerArmorBoots))
+		LivingEntity entity = event.getEntityLiving();
+		if(event.getSource()==DamageSource.FALL&&entity.getItemStackFromSlot(EquipmentSlotType.FEET).getItem().equals(IEnContent.itemPowerArmorBoots))
 		{
 			int fallreduction = 2;
-			if(entity.getItemStackFromSlot(EntityEquipmentSlot.LEGS).getItem().equals(IEnContent.itemPowerArmorLegs))
+			if(entity.getItemStackFromSlot(EquipmentSlotType.LEGS).getItem().equals(IEnContent.itemPowerArmorLegs))
 			{
-				if(entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem().equals(IEnContent.itemPowerArmorChestplate))
+				if(entity.getItemStackFromSlot(EquipmentSlotType.CHEST).getItem().equals(IEnContent.itemPowerArmorChestplate))
 				{
-					if(entity.getItemStackFromSlot(EntityEquipmentSlot.HEAD).getItem().equals(IEnContent.itemPowerArmorHelmet))
+					if(entity.getItemStackFromSlot(EquipmentSlotType.HEAD).getItem().equals(IEnContent.itemPowerArmorHelmet))
 					{
 						fallreduction = 9;
 					}
@@ -236,41 +229,41 @@ public class EventHandler
 	}
 
 	@SubscribeEvent
-	public static void onPlayerTick(PlayerTickEvent event)
+	public static void onPlayerTick(TickEvent.PlayerTickEvent event)
 	{
-		EntityPlayer player = event.player;
-		if(player.getItemStackFromSlot(EntityEquipmentSlot.FEET).getItem().equals(IEnContent.itemPowerArmorBoots))
+		PlayerEntity player = event.player;
+		if(player.getItemStackFromSlot(EquipmentSlotType.FEET).getItem().equals(IEnContent.itemPowerArmorBoots))
 		{
 			
 		}
-		if(player.getItemStackFromSlot(EntityEquipmentSlot.FEET).getItem().equals(IEnContent.itemPowerArmorBoots)
-				&&player.getItemStackFromSlot(EntityEquipmentSlot.LEGS).getItem().equals(IEnContent.itemPowerArmorLegs)
-				&&player.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem().equals(IEnContent.itemPowerArmorChestplate)
-				&&player.getItemStackFromSlot(EntityEquipmentSlot.HEAD).getItem().equals(IEnContent.itemPowerArmorHelmet))
+		if(player.getItemStackFromSlot(EquipmentSlotType.FEET).getItem().equals(IEnContent.itemPowerArmorBoots)
+				&&player.getItemStackFromSlot(EquipmentSlotType.LEGS).getItem().equals(IEnContent.itemPowerArmorLegs)
+				&&player.getItemStackFromSlot(EquipmentSlotType.CHEST).getItem().equals(IEnContent.itemPowerArmorChestplate)
+				&&player.getItemStackFromSlot(EquipmentSlotType.HEAD).getItem().equals(IEnContent.itemPowerArmorHelmet))
 		{
 			player.extinguish();
-			int energy = EnergyHelper.getEnergyStored(player.getItemStackFromSlot(EntityEquipmentSlot.CHEST));
-			IAttributeInstance iattributeinstance = player.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+			int energy = EnergyHelper.getEnergyStored(player.getItemStackFromSlot(EquipmentSlotType.CHEST));
+			ModifiableAttributeInstance iattributeinstance = player.getAttribute(Attributes.MOVEMENT_SPEED);
 			if(iattributeinstance.getModifier(POWER_ARMOR_SPEED_BOOST_ID)!=null)
 			{
 				iattributeinstance.removeModifier(POWER_ARMOR_SPEED_BOOST_ID);
 			}
-			if(!player.isRiding()&&(player.moveStrafing!=0||player.moveForward!=0)&&energy > 5)
+			if(!player.isPassenger()&&(player.moveStrafing!=0||player.moveForward!=0)&&energy > 5)
 			{
 				iattributeinstance.applyModifier(POWER_ARMOR_SPEED_BOOST);
-				EnergyHelper.extractFlux(player.getItemStackFromSlot(EntityEquipmentSlot.CHEST), 5, false);
+				EnergyHelper.extractFlux(player.getItemStackFromSlot(EquipmentSlotType.CHEST), 5, false);
 			}
 		}
 	}
 
-	public static void playBlockedSound(EntityLivingBase entity)
+	public static void playBlockedSound(LivingEntity entity)
 	{
 		World world = entity.getEntityWorld();
 		if(!world.isRemote)
-			world.playSound(null, entity.getPosition(), SoundEvents.BLOCK_CLOTH_STEP, SoundCategory.PLAYERS, 1, 1);
+			world.playSound(null, entity.getPosition(), SoundEvents.BLOCK_WOOL_STEP, SoundCategory.PLAYERS, 1, 1);
 	}
 
-	public static void playReducedSound(EntityLivingBase entity)
+	public static void playReducedSound(LivingEntity entity)
 	{
 		World world = entity.getEntityWorld();
 		if(!world.isRemote)
@@ -284,25 +277,25 @@ public class EventHandler
 		{
 			float damage = event.getAmount();
 			float mult = 1;
-			EntityLivingBase entity = event.getEntityLiving();
+			LivingEntity entity = event.getEntityLiving();
 			for(int i = 0; i < 4; i++)
 			{
 				switch(i)
 				{
 					case 0:
-						if(entity.getItemStackFromSlot(EntityEquipmentSlot.FEET).getItem().equals(IEnContent.itemPowerArmorBoots))
+						if(entity.getItemStackFromSlot(EquipmentSlotType.FEET).getItem().equals(IEnContent.itemPowerArmorBoots))
 							mult -= 0.05;
 						break;
 					case 1:
-						if(entity.getItemStackFromSlot(EntityEquipmentSlot.LEGS).getItem().equals(IEnContent.itemPowerArmorLegs))
+						if(entity.getItemStackFromSlot(EquipmentSlotType.LEGS).getItem().equals(IEnContent.itemPowerArmorLegs))
 							mult -= 0.2;
 						break;
 					case 2:
-						if(entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem().equals(IEnContent.itemPowerArmorChestplate))
+						if(entity.getItemStackFromSlot(EquipmentSlotType.CHEST).getItem().equals(IEnContent.itemPowerArmorChestplate))
 							mult -= 0.3;
 						break;
 					case 3:
-						if(entity.getItemStackFromSlot(EntityEquipmentSlot.HEAD).getItem().equals(IEnContent.itemPowerArmorHelmet))
+						if(entity.getItemStackFromSlot(EquipmentSlotType.HEAD).getItem().equals(IEnContent.itemPowerArmorHelmet))
 							mult -= 0.15;
 						break;
 				}
@@ -315,47 +308,47 @@ public class EventHandler
 	@SubscribeEvent //So reflection always takes priority
 	public static void reflectArrows(ProjectileImpactEvent.Arrow event)
 	{
-		final EntityArrow projectile = event.getArrow();
+		final ArrowEntity projectile = (ArrowEntity) event.getArrow();
 
 		if(!projectile.getEntityWorld().isRemote)
 		{
-			if(event.getEntity()!=null&&event.getEntity() instanceof EntityLivingBase)
+			if(event.getEntity()!=null&&event.getEntity() instanceof LivingEntity)
 			{
-				EntityLivingBase entity = (EntityLivingBase)event.getRayTraceResult().entityHit;
-				if(entity.getItemStackFromSlot(EntityEquipmentSlot.FEET).getItem().equals(IEnContent.itemPowerArmorBoots)
-						&&entity.getItemStackFromSlot(EntityEquipmentSlot.LEGS).getItem().equals(IEnContent.itemPowerArmorLegs)
-						&&entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem().equals(IEnContent.itemPowerArmorChestplate)
-						&&entity.getItemStackFromSlot(EntityEquipmentSlot.HEAD).getItem().equals(IEnContent.itemPowerArmorHelmet))
+				LivingEntity entity = (LivingEntity)event.getEntity();
+				if(entity.getItemStackFromSlot(EquipmentSlotType.FEET).getItem().equals(IEnContent.itemPowerArmorBoots)
+						&&entity.getItemStackFromSlot(EquipmentSlotType.LEGS).getItem().equals(IEnContent.itemPowerArmorLegs)
+						&&entity.getItemStackFromSlot(EquipmentSlotType.CHEST).getItem().equals(IEnContent.itemPowerArmorChestplate)
+						&&entity.getItemStackFromSlot(EquipmentSlotType.HEAD).getItem().equals(IEnContent.itemPowerArmorHelmet))
 				{
 					Random rand = new Random();
 					int item = rand.nextInt(4);
-					int damageItem = 100+rand.nextInt(25)-rand.nextInt(25);
+					int itemDamage = 100+rand.nextInt(25)-rand.nextInt(25);
 					ItemStack armor = null;
 					switch(item)
 					{
 						case 0:
-							armor = entity.getItemStackFromSlot(EntityEquipmentSlot.FEET);
+							armor = entity.getItemStackFromSlot(EquipmentSlotType.FEET);
 
 							break;
 						case 1:
-							armor = entity.getItemStackFromSlot(EntityEquipmentSlot.LEGS);
+							armor = entity.getItemStackFromSlot(EquipmentSlotType.LEGS);
 							break;
 						case 2:
-							armor = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
+							armor = entity.getItemStackFromSlot(EquipmentSlotType.CHEST);
 							break;
 						case 3:
-							armor = entity.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
+							armor = entity.getItemStackFromSlot(EquipmentSlotType.HEAD);
 							break;
 						default:
-							armor = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
+							armor = entity.getItemStackFromSlot(EquipmentSlotType.CHEST);
 							break;
 					}
 					if(projectile.getDamage() <= 15)
 					{
-						armor.damageItem(damageItem, entity);
+						armor.damageItem(itemDamage, entity, );
 						playReflectSound(entity);
-						projectile.shoot(projectile.motionX*-1, projectile.motionY, projectile.motionZ*-1, 0.3f, 0.2f);
-						projectile.shootingEntity = entity;
+						projectile.shoot(projectile.getMotion().x*-1, projectile.getMotion().y, projectile.getMotion().z*-1, 0.3f, 0.2f);
+						projectile.setShooter(entity);
 						event.setCanceled(true);
 					}
 					else
@@ -369,21 +362,20 @@ public class EventHandler
 		}
 	}
 
-	public static void playReflectSound(EntityLivingBase entity)
+	public static void playReflectSound(LivingEntity entity)
 	{
 		World world = entity.getEntityWorld();
 		if(!world.isRemote)
 			world.playSound(null, entity.getPosition(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.8f, 0.4f);
 	}
 
-	public static void playPirceSound(EntityLivingBase entity)
+	public static void playPirceSound(LivingEntity entity)
 	{
 		World world = entity.getEntityWorld();
 		if(!world.isRemote)
 			world.playSound(null, entity.getPosition(), SoundEvents.BLOCK_ANVIL_BREAK, SoundCategory.PLAYERS, 0.8f, 0.4f);
 	}
 
-	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
 	public static void onGameOverlayRender(RenderGameOverlayEvent.Post e)
 	{
@@ -411,18 +403,18 @@ public class EventHandler
 	{
 		if(Utils.isFluidRelatedItemStack(event.getItemStack()))
 		{
-			FluidStack fs = FluidUtil.getFluidContained(event.getItemStack());
+			Optional<FluidStack> fs = FluidUtil.getFluidContained(event.getItemStack());
 		}
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
-	public static void onLogin(PlayerLoggedInEvent event)
+	public static void onLogin(PlayerEvent.PlayerLoggedInEvent event)
 	{
 
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
-	public static void onLogout(PlayerLoggedOutEvent event)
+	public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event)
 	{
 
 	}
